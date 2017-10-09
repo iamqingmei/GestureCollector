@@ -15,10 +15,7 @@ import ageha.gesturecollector.event.*;
 
 public class TagManager {
     private static final String TAG = "TagManager";
-    private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
-
-    private ExecutorService executorService;
-    private GoogleApiClient googleApiClient;
+//    private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
 
     private static TagManager instance;
 
@@ -36,11 +33,14 @@ public class TagManager {
 
     //private constructor.
     private TagManager(Context context) {
-        this.googleApiClient = new GoogleApiClient.Builder(context)
+        ExecutorService executorService;
+        GoogleApiClient googleApiClient;
+
+        googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(Wearable.API)
                 .build();
 
-        this.executorService = Executors.newCachedThreadPool();
+        executorService = Executors.newCachedThreadPool();
     }
 
     public LinkedList<TagData> getTags() {

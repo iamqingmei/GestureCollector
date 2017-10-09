@@ -11,8 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ageha.gesturecollector.TagManager;
 import ageha.gesturecollector.data.TagData;
@@ -48,8 +48,7 @@ public class ExportActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTitle("Export Data");
-        Button exportDataButton = (Button) findViewById(R.id.exportDataButton);
-        exportDataButton.setOnClickListener(
+        findViewById(R.id.exportDataButton).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
@@ -88,8 +87,7 @@ public class ExportActivity extends AppCompatActivity {
         );
 
 
-        Button deleteButton = (Button) findViewById(R.id.deleteButton);
-        deleteButton.setOnClickListener(
+        findViewById(R.id.deleteButton).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
@@ -104,8 +102,7 @@ public class ExportActivity extends AppCompatActivity {
                 }
         );
 
-        Button allInOneButton = (Button) findViewById(R.id.exportDeleteAllInOneButton);
-        deleteButton.setOnClickListener(
+        findViewById(R.id.exportDeleteAllInOneButton).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
@@ -121,6 +118,10 @@ public class ExportActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        TextView export_text = (TextView) findViewById(R.id.data_summary_text);
+
+        export_text.setText(getDataInfo());
     }
 
     @Override
@@ -134,12 +135,21 @@ public class ExportActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private String getDataInfo(){
+        mRealm = Realm.getInstance(this);
+        mRealm.beginTransaction();
+
+        String data_size = String.valueOf(mRealm.where(DataEntry.class).findAll().size());
+        String tag_size = String.valueOf(TagManager.getInstance(ExportActivity.this).getTags().size());
+
+        return new String("Data Entry: " + data_size + " Tags: " + tag_size);
+    }
     private void deleteAllData() {
         mRealm = Realm.getInstance(this);
         mRealm.beginTransaction();
 
         RealmResults<DataEntry> result = mRealm.where(DataEntry.class).findAll();
-        Log.e("DataCollector", "rows after delete = " + result.size());
+        Log.e("DataCollector", "rows before delete = " + result.size());
         TagManager.getInstance(ExportActivity.this).DeleteTags();
 
         // Delete all matches
@@ -200,25 +210,24 @@ public class ExportActivity extends AppCompatActivity {
                     }
                 });
 
-                StringBuilder sb = new StringBuilder(result.get(i).getAndroidDevice());
-                sb.append(" ,");
-                sb.append(String.valueOf(
-                        (new Date()).getTime() +
-                                (result.get(i).getTimestamp() - System.nanoTime()) / 1000000L));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getX()));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getY()));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getZ()));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getAccuracy()));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getDatasource()));
-                sb.append(" ,");
-                sb.append(String.valueOf(result.get(i).getDatatype()));
-                sb.append("\n");
-                bw.write(sb.toString());
+                String sb = result.get(i).getAndroidDevice() + " ," +
+                        String.valueOf(
+                                (new Date()).getTime() +
+                                        (result.get(i).getTimestamp() - System.nanoTime()) / 1000000L) +
+                        " ," +
+                        String.valueOf(result.get(i).getX()) +
+                        " ," +
+                        String.valueOf(result.get(i).getY()) +
+                        " ," +
+                        String.valueOf(result.get(i).getZ()) +
+                        " ," +
+                        String.valueOf(result.get(i).getAccuracy()) +
+                        " ," +
+                        String.valueOf(result.get(i).getDatasource()) +
+                        " ," +
+                        String.valueOf(result.get(i).getDatatype()) +
+                        "\n";
+                bw.write(sb);
             }
             bw.flush();
             bw.close();

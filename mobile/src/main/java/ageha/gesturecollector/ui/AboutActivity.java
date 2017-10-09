@@ -1,72 +1,24 @@
 package ageha.gesturecollector.ui;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import ageha.gesturecollector.R;
+/**
+ * Created by Ageha on 9/10/17.
+ */
 
-public class AboutActivity extends Activity {
+public class AboutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        if (savedInstanceState == null)
-        {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new AboutFragment())
-                    .commit();
-        }
 
-    }
+        setSupportActionBar((Toolbar) findViewById(R.id.my_awesome_toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-    public static class AboutFragment extends Fragment
-    {
-
-        public AboutFragment()
-        {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState)
-        {
-            View rootView = inflater.inflate(R.layout.fragment_about, container, false);
-
-            ((TextView) rootView.findViewById(R.id.about_content)).setText(Html.fromHtml(getResources().getString(R.string.about_open_source_content)));
-//            ((TextView) rootView.findViewById(R.id.oss_content)).setMovementMethod(LinkMovementMethod.getInstance());
-//
-//            ((TextView) rootView.findViewById(R.id.about_github_content)).setText(Html.fromHtml(getResources().getString(R.string.about_github_content)));
-//            ((TextView) rootView.findViewById(R.id.about_github_content)).setMovementMethod(LinkMovementMethod.getInstance());
-//
-//
-//            ((TextView) rootView.findViewById(R.id.dev_content)).setText(Html.fromHtml(getResources().getString(R.string.about_development_content)));
-//            ((TextView) rootView.findViewById(R.id.dev_content)).setMovementMethod(LinkMovementMethod.getInstance());
-
-
-
-            try
-            {
-                PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-                ((TextView) rootView.findViewById(R.id.header)).setText(getResources().getString(R.string.app_name) + " v." + pInfo.versionName);
-            }
-            catch (PackageManager.NameNotFoundException e)
-            {
-                e.printStackTrace();
-            }
-
-
-            return rootView;
-        }
+        setTitle("About");
     }
 }

@@ -2,6 +2,7 @@ package ageha.gesturecollector;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -15,7 +16,16 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import ageha.shared.*;
+import ageha.gesturecollector.data.Sensor;
+import ageha.gesturecollector.data.SensorNames;
+import ageha.gesturecollector.data.SensorDataPoint;
+import ageha.gesturecollector.event.BusProvider;
+import ageha.gesturecollector.event.SensorRangeEvent;
+import ageha.gesturecollector.event.SensorUpdatedEvent;
+import ageha.gesturecollector.event.NewSensorEvent;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +42,9 @@ public class SensorManager {
     private ExecutorService executorService;
     private GoogleApiClient googleApiClient;
 
-
+    private SparseArray<Sensor> sensorMapping;
+    private ArrayList<Sensor> sensors;
+    private SensorNames sensorNames;
 
     public static synchronized SensorManager getInstance(Context context) {
         if (instance == null) {
@@ -44,6 +56,8 @@ public class SensorManager {
 
     //private constructor.
     private SensorManager(Context context) {
+        this.sensorMapping = new SparseArray<>();
+        this.sensors = new ArrayList<>();
         this.googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(Wearable.API)
                 .build();
@@ -51,7 +65,45 @@ public class SensorManager {
         this.executorService = Executors.newCachedThreadPool();
     }
 
+    ArrayList<Sensor> getSensors() {
+        return (ArrayList<Sensor>) sensors.clone();
+    }
 
+    Sensor getSensor(long id) {
+        return sensorMapping.get((int) id);
+    }
+
+    private Sensor createSensor(int id) {
+        Sensor sensor = new Sensor(id, sensorNames.getName(id));
+
+        sensors.add(sensor);
+        sensorMapping.append(id, sensor);
+
+        BusProvider.postOnMainThread(new NewSensorEvent(sensor));
+
+        return sensor;
+    }
+
+    private Sensor getOrCreateSensor(int id) {
+        Sensor sensor = sensorMapping.get(id);
+
+        if (sensor == null) {
+            sensor = createSensor(id);
+        }
+
+        return sensor;
+    }
+
+    synchronized void addSensorData(int sensorType, int accuracy, Timestamp timestamp, float[] values) {
+        Sensor sensor = getOrCreateSensor(sensorType);
+
+        // TODO: We probably want to pull sensor data point objects from a pool here
+        SensorDataPoint dataPoint = new SensorDataPoint(timestamp, accuracy, values);
+
+        sensor.addDataPoint(dataPoint);
+
+        BusProvider.postOnMainThread(new SensorUpdatedEvent(sensor, dataPoint));
+    }
 
 
     private boolean validateConnection() {

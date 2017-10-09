@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     static final private int action_time = 5;
 
     private Menu mNavigationViewMenu;
-    Toolbar mToolbar;
+    private Toolbar mToolbar;
 
 
     private TextView status;
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         setupUI(findViewById(ageha.gesturecollector.R.id.main_activity));
 
+        mToolbar = (Toolbar) findViewById(ageha.gesturecollector.R.id.my_awesome_toolbar);
         this.tester_name = findViewById(R.id.text_input_name);
         this.test_age = findViewById(R.id.text_input_age);
         this.test_height = findViewById(R.id.text_input_height);
