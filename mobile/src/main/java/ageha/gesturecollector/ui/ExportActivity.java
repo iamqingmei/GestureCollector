@@ -34,10 +34,12 @@ public class ExportActivity extends AppCompatActivity {
     private Realm mRealm;
     private ProgressBar dataProgressbar;
     private ProgressBar tagProgressbar;
-
+    private final String TAG = "ExportActivity";
+    private TextView export_text;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "OnCreate()");
 
         setContentView(R.layout.activity_export);
 
@@ -119,7 +121,7 @@ public class ExportActivity extends AppCompatActivity {
                 }
         );
 
-        TextView export_text = (TextView) findViewById(R.id.data_summary_text);
+        export_text = (TextView) findViewById(R.id.data_summary_text);
 
         export_text.setText(getDataInfo());
     }
@@ -159,6 +161,8 @@ public class ExportActivity extends AppCompatActivity {
 
         result = mRealm.where(DataEntry.class).findAll();
         Log.e("DataCollector", "rows after delete = " + result.size());
+
+        export_text.setText(getDataInfo());
     }
 
     @Override
@@ -260,23 +264,26 @@ public class ExportActivity extends AppCompatActivity {
         } catch (IOException ioe) {
             Log.e("DataCollector", "IOException while writing Logfile");
         }
+
+        export_text.setText(getDataInfo());
     }
 
 
     private void exportTagsFile() {
-        mRealm = Realm.getInstance(this);
+        Log.i(TAG, "exportTagsFile1");
+        Log.i(TAG, "exportTagsFile4");
         String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
         String filename = String.format("%s_%s.txt", "Tags", date);
 
         final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DataCollector";
-
+        Log.i(TAG, "exportTagsFile2");
         final File logfile = new File(directory, filename);
         final File logPath = logfile.getParentFile();
-
+        Log.i(TAG, "exportTagsFile5");
         if (!logPath.isDirectory() && !logPath.mkdirs()) {
-            Log.e("SensorDashbaord", "Could not create directory for log files");
+            Log.e(TAG, "Could not create directory for log files");
         }
-
+        Log.i(TAG, "exportTagsFile3");
 
         try {
             FileWriter filewriter = new FileWriter(logfile);
@@ -303,6 +310,12 @@ public class ExportActivity extends AppCompatActivity {
                 });
                 ++i;
                 bw.write(tag.getTagName() + ", " +
+                        tag.getTimestamp() + ", " +
+                        tag.getName()+ ", " +
+                        String.valueOf(tag.getAge())+ ", " +
+                        String.valueOf(tag.getHeight())+ ", " +
+                        tag.getGender() + "\n");
+                Log.i(TAG, tag.getTagName() + ", " +
                         tag.getTimestamp() + ", " +
                         tag.getName()+ ", " +
                         String.valueOf(tag.getAge())+ ", " +
@@ -339,5 +352,7 @@ public class ExportActivity extends AppCompatActivity {
         } catch (IOException ioe) {
             Log.e("DataCollector", "IOException while writing Logfile");
         }
+
+        export_text.setText(getDataInfo());
     }
 }
