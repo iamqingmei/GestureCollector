@@ -75,6 +75,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             public void onClick(View v) {
                 if(isRecording){
                     isRecording = false;
+
                     btn_record.setText("START");
                     cb_write_to_file.setEnabled(true);
                     try {
@@ -125,15 +126,16 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             Log.e(TAG, "No sensors returned from getSensorList");
             textView.setText("No sensors returned from getSensorList");
         }
-        Sensor[] sensorArray = list.toArray(new Sensor[list.size()]);
-        for (int i = 0; i < sensorArray.length; i++) {
-            Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
-            //set to fastest delay
-            sensorManager.registerListener(this, sensorArray[i], sampling_rate);
+        else{
+            Sensor[] sensorArray = list.toArray(new Sensor[list.size()]);
+            for (int i = 0; i < sensorArray.length; i++) {
+                Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
+                //set to fastest delay
+                sensorManager.registerListener(this, sensorArray[i], sampling_rate);
 
+            }
+            textView.setText("Found " + sensorArray.length + " sensors");
         }
-        textView.setText("Found " + sensorArray.length + " sensors");
-
     }
 
     public void onBeep(View view){
@@ -198,18 +200,18 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //    }
 
     public File getDocStorageDir(Context context, String albumName) {
-        if ((!isExternalStorageReadable()) | (!isExternalStorageWritable())){
-            super.onStop();
-            Log.e(TAG, "cannot excess to external storage!");
-            return null;
-        }
-
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-        }
+//        if ((!isExternalStorageReadable()) | (!isExternalStorageWritable())){
+//            super.onStop();
+//            Log.e(TAG, "cannot excess to external storage!");
+//            return null;
+//        }
+//
+//        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        if (permissionCheck != PackageManager.PERMISSION_GRANTED){
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.READ_CONTACTS},
+//                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+//        }
         File file = new File(context.getExternalFilesDir(
                 Environment.DIRECTORY_DOCUMENTS), albumName);
         if (!file.mkdirs()) {
