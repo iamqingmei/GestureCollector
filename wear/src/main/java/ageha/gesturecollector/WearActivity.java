@@ -52,6 +52,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     private GoogleApiClient mGoogleApiClient;
     private FileOutputStream fos = null;
+    private StringBuilder sb = new StringBuilder("");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +101,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
                 }else{
                     isRecording = true;
-                    Log.i(TAG, "1");
                     btn_record.setText("STOP");
                     WRITE_TO_FILE = cb_write_to_file.isChecked();
                     cb_write_to_file.setEnabled(false);
@@ -115,8 +115,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        try{
+                        fos.write(sb.toString().getBytes());
+                        } catch (IOException e) {
+                            Log.e(TAG, "here");
+                            e.printStackTrace();
+                        }
                     }
-                    Log.i(TAG, "2");
                 }
             }
         });
@@ -134,6 +139,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             for (int i = 0; i < sensorArray.length; i++) {
                 Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
                 //set to fastest delay
+                sb.append("Found sensor " + i + " " + sensorArray[i].toString());
                 sensorManager.registerListener(this, sensorArray[i], sampling_rate);
 
             }
@@ -149,24 +155,22 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 //        Log.i(TAG, "Sensor update: " + Arrays.toString(sensorEvent.values) + "Sensor Type: " + sensorEvent.sensor.getType());
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            // write to file
-            if(WRITE_TO_FILE && isRecording){
-                WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
-            }
+//        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+//            // write to file
+//            if(WRITE_TO_FILE && isRecording){
+//                WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
+//            }
+//        }
+        if(WRITE_TO_FILE && isRecording){
+            WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
         }
     }
 
 
     public void WriteSensorEvent(long time, int type, float[] values, String sensorInfo){
         try {
-            fos.write(String.valueOf(time).getBytes());
-            fos.write(" ".getBytes());
-            fos.write(String.valueOf(type).getBytes());
-            fos.write(" ".getBytes());
-            fos.write(Arrays.toString(values).getBytes());
-            fos.write(" ".getBytes());
-            fos.write(sensorInfo.getBytes());
+            String temp = String.valueOf(time) + " " + String.valueOf(type) + " " + Arrays.toString(values) + " \n";
+            fos.write(temp.getBytes());
         } catch (IOException e) {
             Log.e(TAG, "here");
             e.printStackTrace();
@@ -187,6 +191,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        }
 
     }
+
 
     public synchronized byte[] int2bytes(int value){
         byte[] result = new byte[4];
