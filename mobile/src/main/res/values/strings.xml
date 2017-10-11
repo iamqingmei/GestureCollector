@@ -26,6 +26,7 @@
     <string name="height_hint">Height(CM)</string>
     <string name="start1_name">Start1</string>
     <string name="start2_name">Start2</string>
+    <string name="show_notification">SHOW THE NEW NOFITICATION</string>
 
     <string name="done_msg">Done!</string>
     <string name="count_down_time">15</string>

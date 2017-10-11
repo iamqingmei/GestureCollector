@@ -1,13 +1,17 @@
 package ageha.gesturecollector;
-
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,12 +41,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText test_height;
     private RadioGroup test_genger;
 
+    private Handler mHandler;
+
+    private WearManager wearManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupUI(findViewById(ageha.gesturecollector.R.id.main_activity));
-
+        Log.w("MainActivity", "OnCreate");
+        System.out.print("MainActivity onCreate");
         mToolbar = (Toolbar) findViewById(ageha.gesturecollector.R.id.my_awesome_toolbar);
         this.tester_name = findViewById(R.id.text_input_name);
         this.test_age = findViewById(R.id.text_input_age);
@@ -52,8 +60,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationView.setNavigationItemSelectedListener(this);
         this.mNavigationViewMenu = mNavigationView.getMenu();
 
+        final Handler handler = new Handler();
+        final Runnable refresh;
+
         initToolbar();
 
+        wearManager = WearManager.getInstance(this);
         findViewById(ageha.gesturecollector.R.id.tag0_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -236,7 +248,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        this.mHandler = new Handler();
+        this.mHandler.postDelayed(m_Runnable, 2000);
     }
+
+
+    private final Runnable m_Runnable = new Runnable() {
+        @Override
+        public void run() {
+            if (wearManager.getWearName() != null){
+                TextView empty_state = (TextView) findViewById(R.id.empty_state);
+                empty_state.setText(wearManager.getWearName());
+            }
+            mHandler.postDelayed(m_Runnable, 2000);
+        }
+    };
 
     private void initToolbar() {
         setSupportActionBar(mToolbar);
@@ -261,6 +288,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
+    }
+    public void sendNotification(View view) {
+        Log.w("MainActivity", "sendNotification");
+        TextView editText = (TextView) findViewById(R.id.editText);
+        if (editText.length() > 0) {
+            editText.setText(null);
+        }
+        String toSend = editText.getText().toString();
+        if(toSend.isEmpty())
+            toSend = "You sent an empty notification";
+
+        Notification notification = new NotificationCompat.Builder(getApplication())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Gesture Collector")
+                .setContentText(toSend)
+                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
+                .build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
+        int notificationId = 1;
+        notificationManager.notify(notificationId, notification);
     }
 
     @Override
