@@ -10,14 +10,14 @@
         android:orientation="vertical">
         <Button
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="34dp"
             android:layout_gravity="center"
             android:text="START"
             android:id="@+id/btn_recording"/>
         <Button
             android:id="@+id/button_beep"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="34dp"
             android:text="Beep"
             android:layout_margin="5pt"
             android:onClick="onBeep" />
@@ -31,7 +31,7 @@
 
         <CheckBox
             android:layout_width="wrap_content"
-            android:layout_height="16dp"
+            android:layout_height="wrap_content"
             android:text="Write to file"
             android:id="@+id/cb_write_to_file" />
     </LinearLayout>

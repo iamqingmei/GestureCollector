@@ -56,6 +56,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        Let the app always on
+        setAmbientEnabled();
         setContentView(R.layout.activity_main);
 
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
@@ -75,7 +77,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             public void onClick(View v) {
                 if(isRecording){
                     isRecording = false;
-
                     btn_record.setText("START");
                     cb_write_to_file.setEnabled(true);
                     try {
@@ -99,6 +100,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
                 }else{
                     isRecording = true;
+                    Log.i(TAG, "1");
                     btn_record.setText("STOP");
                     WRITE_TO_FILE = cb_write_to_file.isChecked();
                     cb_write_to_file.setEnabled(false);
@@ -114,6 +116,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                             e.printStackTrace();
                         }
                     }
+                    Log.i(TAG, "2");
                 }
             }
         });
@@ -146,30 +149,42 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 //        Log.i(TAG, "Sensor update: " + Arrays.toString(sensorEvent.values) + "Sensor Type: " + sensorEvent.sensor.getType());
-
-        // write to file
-        if(WRITE_TO_FILE && isRecording){
-            WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            // write to file
+            if(WRITE_TO_FILE && isRecording){
+                WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
+            }
         }
-
     }
 
 
     public void WriteSensorEvent(long time, int type, float[] values, String sensorInfo){
         try {
-            fos.write(long2bytes(time));
-            fos.write(int2bytes(type));
-            for (int i=0; i< values.length; i++){
-                fos.write(float2bytes(values[i]));
-            }
-//            fos.write(float2bytes(values[0]));
-//            fos.write(float2bytes(values[1]));
-//            fos.write(float2bytes(values[2]));
+            fos.write(String.valueOf(time).getBytes());
+            fos.write(" ".getBytes());
+            fos.write(String.valueOf(type).getBytes());
+            fos.write(" ".getBytes());
+            fos.write(Arrays.toString(values).getBytes());
+            fos.write(" ".getBytes());
             fos.write(sensorInfo.getBytes());
         } catch (IOException e) {
             Log.e(TAG, "here");
             e.printStackTrace();
         }
+//        try {
+//            fos.write(long2bytes(time));
+//            fos.write(int2bytes(type));
+//            for (int i=0; i< values.length; i++){
+//                fos.write(float2bytes(values[i]));
+//            }
+////            fos.write(float2bytes(values[0]));
+////            fos.write(float2bytes(values[1]));
+////            fos.write(float2bytes(values[2]));
+//            fos.write(sensorInfo.getBytes());
+//        } catch (IOException e) {
+//            Log.e(TAG, "here");
+//            e.printStackTrace();
+//        }
 
     }
 
