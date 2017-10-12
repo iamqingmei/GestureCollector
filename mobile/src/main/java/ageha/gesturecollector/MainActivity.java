@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     util.warning_msg(getApplicationContext());
                 }
                 else{
-                    tagging("start1");
+                    tagging("start2");
                     timer.run();
                 }
 
@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     util.warning_msg(getApplicationContext());
                 }
                 else{
-                    tagging("start2");
+                    tagging("start1");
                     timer.run();
                 }
 

@@ -116,7 +116,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                             e.printStackTrace();
                         }
                         try{
-                        fos.write(sb.toString().getBytes());
+                            fos.write(sb.toString().getBytes());
+                            fos.write("TIMESTAMP, SENSORTYPE, VALUES, /n".getBytes());
                         } catch (IOException e) {
                             Log.e(TAG, "here");
                             e.printStackTrace();
@@ -139,7 +140,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             for (int i = 0; i < sensorArray.length; i++) {
                 Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
                 //set to fastest delay
-                sb.append("Found sensor " + i + " " + sensorArray[i].toString());
+                sb.append("Found sensor " + i + " " + sensorArray[i].toString() + '\n');
                 sensorManager.registerListener(this, sensorArray[i], sampling_rate);
 
             }
@@ -154,13 +155,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-//        Log.i(TAG, "Sensor update: " + Arrays.toString(sensorEvent.values) + "Sensor Type: " + sensorEvent.sensor.getType());
-//        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-//            // write to file
-//            if(WRITE_TO_FILE && isRecording){
-//                WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
-//            }
-//        }
         if(WRITE_TO_FILE && isRecording){
             WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
         }
@@ -169,7 +163,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     public void WriteSensorEvent(long time, int type, float[] values, String sensorInfo){
         try {
-            String temp = String.valueOf(time) + " " + String.valueOf(type) + " " + Arrays.toString(values) + " \n";
+            String temp = String.valueOf(time) + ", " + String.valueOf(type) + ", " + Arrays.toString(values) + " \n";
             fos.write(temp.getBytes());
         } catch (IOException e) {
             Log.e(TAG, "here");
@@ -193,27 +187,27 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     }
 
 
-    public synchronized byte[] int2bytes(int value){
-        byte[] result = new byte[4];
-        for(int i = 3; i>=0; i--){
-            result[i] = (byte)(value & 0xFF);
-            value >>= 8;
-        }
-        return result;
-    }
+//    public synchronized byte[] int2bytes(int value){
+//        byte[] result = new byte[4];
+//        for(int i = 3; i>=0; i--){
+//            result[i] = (byte)(value & 0xFF);
+//            value >>= 8;
+//        }
+//        return result;
+//    }
+//
+//    public synchronized byte[] long2bytes(long value){
+//        byte[] result = new byte[8];
+//        for (int i = 7; i >= 0; i--) {
+//            result[i] = (byte)(value & 0xFF);
+//            value >>= 8;
+//        }
+//        return result;
+//    }
 
-    public synchronized byte[] long2bytes(long value){
-        byte[] result = new byte[8];
-        for (int i = 7; i >= 0; i--) {
-            result[i] = (byte)(value & 0xFF);
-            value >>= 8;
-        }
-        return result;
-    }
-
-    public synchronized byte[] float2bytes(float value){
-        return int2bytes(Float.floatToIntBits(value));
-    }
+//    public synchronized byte[] float2bytes(float value){
+//        return int2bytes(Float.floatToIntBits(value));
+//    }
 
 //    public synchronized byte[] double2bytes(double value){
 //        return long2bytes(Double.doubleToLongBits(value));
@@ -241,19 +235,19 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     }
 
     /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
-        Log.i(TAG, "isExternalStorageWritable()");
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state);
-    }
-
-    /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
-        Log.i(TAG, "isExternalStorageReadable()");
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-    }
+//    public boolean isExternalStorageWritable() {
+//        Log.i(TAG, "isExternalStorageWritable()");
+//        String state = Environment.getExternalStorageState();
+//        return Environment.MEDIA_MOUNTED.equals(state);
+//    }
+//
+//    /* Checks if external storage is available to at least read */
+//    public boolean isExternalStorageReadable() {
+//        Log.i(TAG, "isExternalStorageReadable()");
+//        String state = Environment.getExternalStorageState();
+//        return Environment.MEDIA_MOUNTED.equals(state) ||
+//                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+//    }
 
 
     @Override
