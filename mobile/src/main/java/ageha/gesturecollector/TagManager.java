@@ -2,13 +2,8 @@ package ageha.gesturecollector;
 
 import android.content.Context;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Wearable;
-
 import java.sql.Timestamp;
 import java.util.LinkedList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import ageha.gesturecollector.data.TagData;
 import ageha.gesturecollector.event.*;
@@ -33,14 +28,6 @@ public class TagManager {
 
     //private constructor.
     private TagManager(Context context) {
-        ExecutorService executorService;
-        GoogleApiClient googleApiClient;
-
-        googleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-
-        executorService = Executors.newCachedThreadPool();
     }
 
     public LinkedList<TagData> getTags() {
@@ -57,5 +44,6 @@ public class TagManager {
 
         BusProvider.postOnMainThread(new TagAddedEvent(tag));
     }
+
 }
 

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.CountDownTimer;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.ActionBar;
@@ -27,9 +27,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import ageha.gesturecollector.ui.*;
@@ -40,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     static final private int count_down_time = 4;
     static final private int action_time = 5;
 
-    private Menu mNavigationViewMenu;
     private Toolbar mToolbar;
 
     private TextView status;
@@ -50,9 +46,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText test_height;
     private RadioGroup test_genger;
 
-    private Handler mHandler;
-
-    private WearManager wearManager;
     private TimeStart timer;
     private MakeBeepSound beep;
 
@@ -73,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_genger = findViewById(R.id.radioGrpGender);
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
-        this.mNavigationViewMenu = mNavigationView.getMenu();
+//        Menu mNavigationViewMenu = mNavigationView.getMenu();
         timer = new TimeStart();
         beep = new MakeBeepSound(100, 150);
 
@@ -95,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initToolbar();
 
-        wearManager = WearManager.getInstance(this);
+//        WearManager wearManager = WearManager.getInstance(this);
         findViewById(ageha.gesturecollector.R.id.tag0_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("1");
-
+                    timer.run();
                 }
 
             }
@@ -331,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.v("MainActivity","onConnectionFailed called");
     }
 
@@ -342,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void sendNotification(View view) {
         Log.i("MainActivity", "sendNotification");
-        TextView editText = (TextView) findViewById(R.id.editText);
+        TextView editText = findViewById(R.id.editText);
         if (editText.length() > 0) {
             editText.setText(null);
         }
@@ -386,10 +379,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String text;
                     if ((millisUntilFinish / 1000) == action_time){
                         text = "Start!";
+                        beep.run();
                     }
                     else if ((millisUntilFinish / 1000) >= action_time){
                         text = "Counting Down: " + String.valueOf((millisUntilFinish - action_time * 1000)/1000);
-                        beep.run();
                     }else{
                         text = "Recording Data: " + String.valueOf(millisUntilFinish /1000);
                         beep.run();
@@ -480,6 +473,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         gender);
         String tex = "Action: \n" + tag;
         empty_state.setText(tex);
+//        registerTagUserInfo(gender);
     }
 
     @Override
@@ -518,7 +512,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private ToneGenerator beep;
         int dur;
 
-        public MakeBeepSound(int duration, int volume){
+        MakeBeepSound(int duration, int volume){
             this.dur = duration;
             this.beep = new ToneGenerator(AudioManager.STREAM_MUSIC, volume); // beep's volume
         }
@@ -527,4 +521,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.beep.startTone(ToneGenerator.TONE_CDMA_PIP,this.dur);
         }
     }
+
+//    private void registerTagUserInfo(String gender){
+//        TagManager.getInstance(MainActivity.this).addUserInfo("name: " + tester_name.getText().toString() + " age: " + test_age.getText().toString() + " height: " + test_height.getText().toString() + "gender: " + gender + "\n");
+//    }
 }
