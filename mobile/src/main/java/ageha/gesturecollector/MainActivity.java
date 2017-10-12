@@ -2,6 +2,8 @@ package ageha.gesturecollector;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -11,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,9 +25,16 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
+
 import ageha.gesturecollector.ui.*;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
 
     static final private int count_down_time = 4;
@@ -36,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
 
     private TextView status;
+    private TextView empty_state;
     private EditText tester_name;
     private EditText test_age;
     private EditText test_height;
@@ -44,14 +53,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Handler mHandler;
 
     private WearManager wearManager;
+    private TimeStart timer;
+    private MakeBeepSound beep;
+
+
+    GoogleApiClient mGoogleApiClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupUI(findViewById(ageha.gesturecollector.R.id.main_activity));
-        Log.w("MainActivity", "OnCreate");
+        Log.i("MainActivity", "OnCreate");
         System.out.print("MainActivity onCreate");
-        mToolbar = (Toolbar) findViewById(ageha.gesturecollector.R.id.my_awesome_toolbar);
+        this.mToolbar = findViewById(ageha.gesturecollector.R.id.my_awesome_toolbar);
+        this.empty_state = findViewById(R.id.empty_state);
         this.tester_name = findViewById(R.id.text_input_name);
         this.test_age = findViewById(R.id.text_input_age);
         this.test_height = findViewById(R.id.text_input_height);
@@ -59,7 +74,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
         this.mNavigationViewMenu = mNavigationView.getMenu();
+        timer = new TimeStart();
+        beep = new MakeBeepSound(100, 150);
 
+        if(null == mGoogleApiClient) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            Log.v("MainActivity", "GoogleApiClient created");
+        }
+
+        if(!mGoogleApiClient.isConnected()){
+            mGoogleApiClient.connect();
+            Log.v("MainActivity", "Connecting to GoogleApiClient..");
+        }
 //        final Handler handler = new Handler();
 //        final Runnable refresh;
 
@@ -75,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("0");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -90,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("1");
-                    time_start();
+
                 }
 
             }
@@ -105,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("2");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -120,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("3");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -135,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("4");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -150,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("5");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -165,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("6");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -180,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("7");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -195,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("8");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -211,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("9");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -226,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("start1");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -241,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     tagging("start2");
-                    time_start();
+                    timer.run();
                 }
 
             }
@@ -254,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i("MainActivity", "111");
         startService(new Intent(this, SensorReceiverService.class));
         Log.i("MainActivity", "222");
+
+
     }
 
 
@@ -292,8 +324,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
     }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.v("MainActivity","onConnectionSuspended called");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.v("MainActivity","onConnectionFailed called");
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.v("MainActivity","onConnected called");
+    }
+
     public void sendNotification(View view) {
-        Log.w("MainActivity", "sendNotification");
+        Log.i("MainActivity", "sendNotification");
         TextView editText = (TextView) findViewById(R.id.editText);
         if (editText.length() > 0) {
             editText.setText(null);
@@ -312,6 +360,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
         int notificationId = 1;
         notificationManager.notify(notificationId, notification);
+
+//        new SendActivityPhoneMessage("/testing_path", "hii").run();
     }
 
     @Override
@@ -326,39 +376,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    private void time_start(){
-        Log.w("main_activity", "time_start function");
-        status = (TextView) findViewById(ageha.gesturecollector.R.id.timer_state);
-        status.setText(ageha.gesturecollector.R.string.count_down_time);
+    private class TimeStart extends Thread{
+        public void run(){
+            Log.i("main_activity", "TimeStart");
+            status = findViewById(ageha.gesturecollector.R.id.timer_state);
+            CountDownTimer countDownTimer = new CountDownTimer((count_down_time + action_time) * 1000, 1000){
+                @Override
+                public void onTick(long millisUntilFinish){
+                    String text;
+                    if ((millisUntilFinish / 1000) == action_time){
+                        text = "Start!";
+                    }
+                    else if ((millisUntilFinish / 1000) >= action_time){
+                        text = "Counting Down: " + String.valueOf((millisUntilFinish - action_time * 1000)/1000);
+                        beep.run();
+                    }else{
+                        text = "Recording Data: " + String.valueOf(millisUntilFinish /1000);
+                        beep.run();
 
-        CountDownTimer countDownTimer = new CountDownTimer((count_down_time + action_time) * 1000, 1000){
-            @Override
-            public void onTick(long millisUntilFinish){
-                String text;
-                if ((millisUntilFinish / 1000) == action_time){
-                    text = "Start!";
+                    }
+                    status.setText(text);
                 }
-                else if ((millisUntilFinish / 1000) >= action_time){
-                    text = "Counting Down: " + String.valueOf((millisUntilFinish - action_time * 1000)/1000);
-                }else{
-                    text = "Recording Data: " + String.valueOf(millisUntilFinish /1000);
+                @Override
+                public void onFinish(){
+                    status.setText(ageha.gesturecollector.R.string.done_msg);
                 }
-
-                status.setText(text);
-            }
-
-            @Override
-            public void onFinish(){
-                status.setText(ageha.gesturecollector.R.string.done_msg);
-            }
-        };
-
-        countDownTimer.start();
+            };
+            countDownTimer.start();
+        }
     }
 
 
     private boolean check_tester_info_input(Context context){
-        Log.w("main_activity", "check_tester_info_input function");
+        Log.i("main_activity", "check_tester_info_input function");
         if (tester_name.getText().toString().isEmpty()) {
             util.warning_msg(context, "No tester name");
             return false;
@@ -428,5 +478,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Integer.parseInt(test_age.getText().toString()),
                         Integer.parseInt(test_height.getText().toString()),
                         gender);
+        String tex = "Action: \n" + tag;
+        empty_state.setText(tex);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.v("MainActivity", "onStart called");
+    }
+
+//    private class SendActivityPhoneMessage extends Thread {
+//        String path;
+//        String message;
+//
+//        // Constructor to send a message to the data layer
+//        SendActivityPhoneMessage(String p, String msg) {
+//            Log.i("SendActivityPhoneMsg", "inited");
+//            path = p;
+//            message = msg;
+//        }
+//
+//        public void run() {
+//            NodeApi.GetLocalNodeResult nodes = Wearable.NodeApi.getLocalNode(mGoogleApiClient).await();
+//            Node node = nodes.getNode();
+//            Log.v("SendActivityPhoneMsg", "Activity Node is : "+node.getId()+ " - " + node.getDisplayName());
+//            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
+//            if (result.getStatus().isSuccess()) {
+//                Log.v("SendActivityPhoneMsg", "Activity Message: {" + message + "} sent to: " + node.getDisplayName());
+//            }
+//            else {
+//                // Log an error
+//                Log.v("SendActivityPhoneMsg", "ERROR: failed to send Activity Message");
+//            }
+//        }
+//    }
+
+    private class MakeBeepSound extends Thread{
+        private ToneGenerator beep;
+        int dur;
+
+        public MakeBeepSound(int duration, int volume){
+            this.dur = duration;
+            this.beep = new ToneGenerator(AudioManager.STREAM_MUSIC, volume); // beep's volume
+        }
+
+        public void run(){
+            this.beep.startTone(ToneGenerator.TONE_CDMA_PIP,this.dur);
+        }
     }
 }

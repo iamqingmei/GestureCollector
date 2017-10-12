@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import ageha.shared.DataMapKeys;
 
 
-public class SensorReceiverService extends WearableListenerService{
+public class SensorReceiverService extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
     private static final String TAG = "SensorReceiverService";
 
     public static final String CONFIG_START = "config/start";
@@ -45,20 +45,20 @@ public class SensorReceiverService extends WearableListenerService{
         super.onCreate();
 
         Log.w(TAG, "onCreate");
-        System.out.print("here");
-//        if(null == mGoogleApiClient) {
-//            mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                    .addApi(Wearable.API)
-//                    .addConnectionCallbacks(this)
-//                    .addOnConnectionFailedListener(this)
-//                    .build();
-//            Log.v(TAG, "GoogleApiClient created");
-//        }
-//
-//        if(!mGoogleApiClient.isConnected()){
-//            mGoogleApiClient.connect();
-//            Log.v(TAG, "Connecting to GoogleApiClient..");
-//        }
+
+        if(null == mGoogleApiClient) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            Log.v(TAG, "GoogleApiClient created");
+        }
+
+        if(!mGoogleApiClient.isConnected()){
+            mGoogleApiClient.connect();
+            Log.v(TAG, "Connecting to GoogleApiClient..");
+        }
 
         sensorManager = SensorManager.getInstance(this);
         wearManager = WearManager.getInstance(this);
@@ -68,7 +68,6 @@ public class SensorReceiverService extends WearableListenerService{
     public void onPeerConnected(Node peer) {
         super.onPeerConnected(peer);
 //        wearManager.sensorConnected("Connected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
-        Log.i(TAG, "Connected!!!!!!!!!!!!!!!!");
         Log.i(TAG, "Connected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
     }
 
@@ -83,20 +82,20 @@ public class SensorReceiverService extends WearableListenerService{
     public void onDataChanged(DataEventBuffer dataEvents) {
         Log.d(TAG, "onDataChanged()");
 //
-//        for (DataEvent dataEvent : dataEvents) {
-//            if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
-//                DataItem dataItem = dataEvent.getDataItem();
-//                Uri uri = dataItem.getUri();
-//                String path = uri.getPath();
-//
-//                if (path.startsWith("/sensors/")) {
-//                    unpackSensorData(
-//                            Integer.parseInt(uri.getLastPathSegment()),
-//                            DataMapItem.fromDataItem(dataItem).getDataMap()
-//                    );
-//                }
-//            }
-//        }
+        for (DataEvent dataEvent : dataEvents) {
+            if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
+                DataItem dataItem = dataEvent.getDataItem();
+                Uri uri = dataItem.getUri();
+                String path = uri.getPath();
+
+                if (path.startsWith("/sensors/")) {
+                    unpackSensorData(
+                            Integer.parseInt(uri.getLastPathSegment()),
+                            DataMapItem.fromDataItem(dataItem).getDataMap()
+                    );
+                }
+            }
+        }
 
 //        if (Log.isLoggable(TAG, Log.DEBUG)) {
 //            Log.d(TAG, "onDataChanged: " + dataEvents);
@@ -130,53 +129,56 @@ public class SensorReceiverService extends WearableListenerService{
 //        }
     }
 
-//    private void unpackSensorData(int sensorType, DataMap dataMap) {
-////        Log.w("TEST", dataMap.keySet().toString()); [accuracy, timestamp, values]
+    private void unpackSensorData(int sensorType, DataMap dataMap) {
+//        Log.w("TEST", dataMap.keySet().toString()); [accuracy, timestamp, values]
+
+        int accuracy = dataMap.getInt(DataMapKeys.ACCURACY);
+        Timestamp timestamp = new Timestamp(dataMap.getLong(DataMapKeys.TIMESTAMP));
+        float[] values = dataMap.getFloatArray(DataMapKeys.VALUES);
+
+        Log.d(TAG, "Received sensor data " + sensorType + " = " + Arrays.toString(values));
+
+        sensorManager.addSensorData(sensorType, accuracy, timestamp, values);
+    }
 //
-//        int accuracy = dataMap.getInt(DataMapKeys.ACCURACY);
-//        Timestamp timestamp = new Timestamp(dataMap.getLong(DataMapKeys.TIMESTAMP));
-//        float[] values = dataMap.getFloatArray(DataMapKeys.VALUES);
-//
-//        Log.d(TAG, "Received sensor data " + sensorType + " = " + Arrays.toString(values));
-//
-//        sensorManager.addSensorData(sensorType, accuracy, timestamp, values);
-//    }
-//
-//    @Override
-//    public void onDestroy() {
-//
-//        Log.v(TAG, "Destroyed");
-//
-//        if(null != mGoogleApiClient){
-//            if(mGoogleApiClient.isConnected()){
-//                mGoogleApiClient.disconnect();
-//                Log.v(TAG, "GoogleApiClient disconnected");
-//            }
-//        }
-//
-//        super.onDestroy();
-//    }
-//
-//    @Override
-//    public void onConnectionSuspended(int cause) {
-//        Log.v(TAG,"onConnectionSuspended called");
-//    }
-//
-//    public void onConnectionFailed(ConnectionResult connectionResult) {
-//        Log.v(TAG,"onConnectionFailed called");
-//    }
-//
-//    public void onConnected(Bundle connectionHint) {
-//        Log.v(TAG,"onConnected called");
-//
-//    }
-//
-//    public void onMessageReceived(MessageEvent messageEvent) {
-//        super.onMessageReceived(messageEvent);
-//        if(messageEvent.getPath().equals(CONFIG_START)){
-//            //do something here
-//        }else if(messageEvent.getPath().equals(CONFIG_STOP)){
-//            //do something here
-//        }
-//    }
+    @Override
+    public void onDestroy() {
+
+        Log.v(TAG, "Destroyed");
+
+        if(null != mGoogleApiClient){
+            if(mGoogleApiClient.isConnected()){
+                mGoogleApiClient.disconnect();
+                Log.v(TAG, "GoogleApiClient disconnected");
+            }
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        super.onMessageReceived(messageEvent);
+        if(messageEvent.getPath().equals(CONFIG_START)){
+            Log.i(TAG, "start " + Arrays.toString(messageEvent.getData()));
+        }else if(messageEvent.getPath().equals(CONFIG_STOP)){
+            Log.i(TAG, "stop " + Arrays.toString(messageEvent.getData()));
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.v(TAG,"onConnectionSuspended called");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.v(TAG,"onConnectionFailed called");
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.v(TAG,"onConnected called");
+
+    }
 }
