@@ -126,7 +126,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                         }
                         try{
                             fos.write(sb.toString().getBytes());
-                            fos.write("TIMESTAMP, SENSORTYPE, VALUES \n".getBytes());
+                            fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
                         } catch (IOException e) {
                             Log.e(TAG, "here");
                             e.printStackTrace();
@@ -175,7 +175,17 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     public void WriteSensorEvent(long time, int type, float[] values){
         try {
-            String temp = String.valueOf(time) + ", " + String.valueOf(type) + ", " + Arrays.toString(values) + " \n";
+            String temp = String.valueOf(time) + ", " + String.valueOf(type);
+            for (int i = 0; i < 5; i++){
+                if (i<values.length){
+                    temp = temp + ", " + String.valueOf(values[i]);
+
+                } else {
+                    temp = temp + ", ";
+                }
+
+            }
+            temp += '\n';
             fos.write(temp.getBytes());
         } catch (IOException e) {
             Log.e(TAG, "here");
