@@ -34,7 +34,7 @@ import java.io.File;
 //import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -54,9 +54,15 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private GoogleApiClient mGoogleApiClient;
     private FileOutputStream fos = null;
     private StringBuilder sb = new StringBuilder("");
+    private long dateBase;
+    private long timeStampBase;
+
+    private long sensorTimeReference = 0l;
+    private long myTimeReference = 0l;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 //        Let the app always on
         setAmbientEnabled();
@@ -64,6 +70,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
 
+        dateBase = (new Date()).getTime();
+        timeStampBase = System.nanoTime();
         TextView textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
         cb_write_to_file = findViewById(R.id.cb_write_to_file);
@@ -167,7 +175,16 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(WRITE_TO_FILE && isRecording){
-            long time = (new Date()).getTime() + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
+//            long time = dateBase + (sensorEvent.timestamp - timeStampBase) / 1000000L;
+            // set reference times
+            if(sensorTimeReference == 0l && myTimeReference == 0l) {
+                sensorTimeReference = sensorEvent.timestamp;
+                myTimeReference = System.currentTimeMillis();
+            }
+            // set event timestamp to current time in milliseconds
+            long time = myTimeReference +
+                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
+
             WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
         }
     }
