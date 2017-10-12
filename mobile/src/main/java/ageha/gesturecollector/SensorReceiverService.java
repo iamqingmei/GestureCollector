@@ -40,12 +40,12 @@ public class SensorReceiverService extends WearableListenerService{
 
     }
 
-//    @Override
-//    public void onCreate() {
-//        super.onCreate();
-//
-//        Log.w(TAG, "onCreate");
-//        System.out.print("here");
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Log.w(TAG, "onCreate");
+        System.out.print("here");
 //        if(null == mGoogleApiClient) {
 //            mGoogleApiClient = new GoogleApiClient.Builder(this)
 //                    .addApi(Wearable.API)
@@ -59,29 +59,29 @@ public class SensorReceiverService extends WearableListenerService{
 //            mGoogleApiClient.connect();
 //            Log.v(TAG, "Connecting to GoogleApiClient..");
 //        }
-//
-//        sensorManager = SensorManager.getInstance(this);
-//        wearManager = WearManager.getInstance(this);
-//    }
 
-//    @Override
-//    public void onPeerConnected(Node peer) {
-//        super.onPeerConnected(peer);
+        sensorManager = SensorManager.getInstance(this);
+        wearManager = WearManager.getInstance(this);
+    }
+
+    @Override
+    public void onPeerConnected(Node peer) {
+        super.onPeerConnected(peer);
 //        wearManager.sensorConnected("Connected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
-//        Log.i(TAG, "Connected!!!!!!!!!!!!!!!!");
-//        Log.i(TAG, "Connected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
-//    }
-//
-//    @Override
-//    public void onPeerDisconnected(Node peer) {
-//        super.onPeerDisconnected(peer);
-//
-//        Log.i(TAG, "Disconnected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
-//    }
+        Log.i(TAG, "Connected!!!!!!!!!!!!!!!!");
+        Log.i(TAG, "Connected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
+    }
+
+    @Override
+    public void onPeerDisconnected(Node peer) {
+        super.onPeerDisconnected(peer);
+
+        Log.i(TAG, "Disconnected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
+    }
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-//        Log.d(TAG, "onDataChanged()");
+        Log.d(TAG, "onDataChanged()");
 //
 //        for (DataEvent dataEvent : dataEvents) {
 //            if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
@@ -98,36 +98,36 @@ public class SensorReceiverService extends WearableListenerService{
 //            }
 //        }
 
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onDataChanged: " + dataEvents);
-        }
-
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .build();
-
-        ConnectionResult connectionResult =
-                googleApiClient.blockingConnect(30, TimeUnit.SECONDS);
-
-        if (!connectionResult.isSuccess()) {
-            Log.e(TAG, "Failed to connect to GoogleApiClient.");
-            return;
-        }
-
-        // Loop through the events and send a message
-        // to the node that created the data item.
-        for (DataEvent event : dataEvents) {
-            Uri uri = event.getDataItem().getUri();
-
-            // Get the node id from the host value of the URI
-            String nodeId = uri.getHost();
-            // Set the data of the message to be the bytes of the URI
-            byte[] payload = uri.toString().getBytes();
-
-            // Send the RPC
-            Wearable.MessageApi.sendMessage(googleApiClient, nodeId,
-                    DATA_ITEM_RECEIVED_PATH, payload);
-        }
+//        if (Log.isLoggable(TAG, Log.DEBUG)) {
+//            Log.d(TAG, "onDataChanged: " + dataEvents);
+//        }
+//
+//        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+//                .addApi(Wearable.API)
+//                .build();
+//
+//        ConnectionResult connectionResult =
+//                googleApiClient.blockingConnect(30, TimeUnit.SECONDS);
+//
+//        if (!connectionResult.isSuccess()) {
+//            Log.e(TAG, "Failed to connect to GoogleApiClient.");
+//            return;
+//        }
+//
+//        // Loop through the events and send a message
+//        // to the node that created the data item.
+//        for (DataEvent event : dataEvents) {
+//            Uri uri = event.getDataItem().getUri();
+//
+//            // Get the node id from the host value of the URI
+//            String nodeId = uri.getHost();
+//            // Set the data of the message to be the bytes of the URI
+//            byte[] payload = uri.toString().getBytes();
+//
+//            // Send the RPC
+//            Wearable.MessageApi.sendMessage(googleApiClient, nodeId,
+//                    DATA_ITEM_RECEIVED_PATH, payload);
+//        }
     }
 
 //    private void unpackSensorData(int sensorType, DataMap dataMap) {

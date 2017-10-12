@@ -28,12 +28,12 @@ import ageha.gesturecollector.ui.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+
     static final private int count_down_time = 4;
     static final private int action_time = 5;
 
     private Menu mNavigationViewMenu;
     private Toolbar mToolbar;
-
 
     private TextView status;
     private EditText tester_name;
@@ -60,8 +60,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationView.setNavigationItemSelectedListener(this);
         this.mNavigationViewMenu = mNavigationView.getMenu();
 
-        final Handler handler = new Handler();
-        final Runnable refresh;
+//        final Handler handler = new Handler();
+//        final Runnable refresh;
 
         initToolbar();
 
@@ -249,21 +249,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        this.mHandler = new Handler();
-        this.mHandler.postDelayed(m_Runnable, 2000);
+//        this.mHandler = new Handler();
+//        this.mHandler.postDelayed(m_Runnable, 2000);
+        Log.i("MainActivity", "111");
+        startService(new Intent(this, SensorReceiverService.class));
+        Log.i("MainActivity", "222");
     }
 
 
-    private final Runnable m_Runnable = new Runnable() {
-        @Override
-        public void run() {
-            if (wearManager.getWearName() != null){
-                TextView empty_state = (TextView) findViewById(R.id.empty_state);
-                empty_state.setText(wearManager.getWearName());
-            }
-            mHandler.postDelayed(m_Runnable, 2000);
-        }
-    };
+//    private final Runnable m_Runnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            if (wearManager.getWearName() != null){
+//                TextView empty_state = (TextView) findViewById(R.id.empty_state);
+//                empty_state.setText(wearManager.getWearName());
+//            }
+//            mHandler.postDelayed(m_Runnable, 2000);
+//        }
+//    };
 
     private void initToolbar() {
         setSupportActionBar(mToolbar);
