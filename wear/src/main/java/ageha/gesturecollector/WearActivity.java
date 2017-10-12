@@ -73,6 +73,14 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 .build();
 
 
+        findViewById(R.id.button_quit).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+            }
+        });
+
         btn_record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,8 +101,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                         dataMap.getDataMap().putAsset("fileasset", asset);
                         PutDataRequest request = dataMap.asPutDataRequest();
                         Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -117,7 +123,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                         }
                         try{
                             fos.write(sb.toString().getBytes());
-                            fos.write("TIMESTAMP, SENSORTYPE, VALUES, /n".getBytes());
+                            fos.write("TIMESTAMP, SENSORTYPE, VALUES, \n".getBytes());
                         } catch (IOException e) {
                             Log.e(TAG, "here");
                             e.printStackTrace();

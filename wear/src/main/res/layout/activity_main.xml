@@ -8,19 +8,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <Button
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="34dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/button_beep"
+                android:layout_width="70dp"
+                android:layout_height="37dp"
+                android:text="Beep"
+                android:layout_margin="5pt"
+                android:onClick="onBeep" />
+
+            <Button
+                android:id="@+id/button_quit"
+                android:layout_width="70dp"
+                android:layout_height="37dp"
+                android:text="Quit"
+                android:layout_margin="5pt"
+                android:onClick="onBeep" />
+        </LinearLayout>
+        <Button
+            android:layout_width="70dp"
+            android:layout_height="37dp"
             android:layout_gravity="center"
             android:text="START"
             android:id="@+id/btn_recording"/>
-        <Button
-            android:id="@+id/button_beep"
-            android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:text="Beep"
-            android:layout_margin="5pt"
-            android:onClick="onBeep" />
+
 
         <TextView
             android:id="@+id/text"
