@@ -1,9 +1,9 @@
 package ageha.gesturecollector;
 
 
-import android.Manifest;
+//import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
+//import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,8 +12,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+//import android.support.v4.app.ActivityCompat;
+//import android.support.v4.content.ContextCompat;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,18 +23,19 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Asset;
+//import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
+//import com.google.android.gms.wearable.PutDataMapRequest;
+//import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
-import java.io.FileInputStream;
+//import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 
@@ -42,7 +43,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     private static final String TAG = "WearActivity";
 
-    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
+//    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
     private String FILENAME ="";
     private String file_path;
     private boolean WRITE_TO_FILE = false;
@@ -63,9 +64,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
 
-        TextView textView = (TextView) findViewById(R.id.text);
-        btn_record = (Button)findViewById(R.id.btn_recording);
-        cb_write_to_file = (CheckBox)findViewById(R.id.cb_write_to_file);
+        TextView textView = findViewById(R.id.text);
+        btn_record = findViewById(R.id.btn_recording);
+        cb_write_to_file = findViewById(R.id.cb_write_to_file);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -86,28 +87,30 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             public void onClick(View v) {
                 if(isRecording){
                     isRecording = false;
-                    btn_record.setText("START");
+                    String start_tex = "START";
+                    btn_record.setText(start_tex);
                     cb_write_to_file.setEnabled(true);
                     try {
                         if(fos!=null)
                             fos.close();
 
-                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/filename");
-                        putDataMapReq.getDataMap().putString("filename", FILENAME);
-                        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-                        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
-                        Asset asset = createAssetFromFile(file_path);
-                        PutDataMapRequest dataMap = PutDataMapRequest.create("/file");
-                        dataMap.getDataMap().putAsset("fileasset", asset);
-                        PutDataRequest request = dataMap.asPutDataRequest();
-                        Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+//                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/filename");
+//                        putDataMapReq.getDataMap().putString("filename", FILENAME);
+//                        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+//                        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+//                        Asset asset = createAssetFromFile(file_path);
+//                        PutDataMapRequest dataMap = PutDataMapRequest.create("/file");
+//                        dataMap.getDataMap().putAsset("fileasset", asset);
+//                        PutDataRequest request = dataMap.asPutDataRequest();
+//                        Wearable.DataApi.putDataItem(mGoogleApiClient, request);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                 }else{
                     isRecording = true;
-                    btn_record.setText("STOP");
+                    String stop_tex = "STOP";
+                    btn_record.setText(stop_tex);
                     WRITE_TO_FILE = cb_write_to_file.isChecked();
                     cb_write_to_file.setEnabled(false);
                     if(WRITE_TO_FILE) {
@@ -123,7 +126,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                         }
                         try{
                             fos.write(sb.toString().getBytes());
-                            fos.write("TIMESTAMP, SENSORTYPE, VALUES, \n".getBytes());
+                            fos.write("TIMESTAMP, SENSORTYPE, VALUES \n".getBytes());
                         } catch (IOException e) {
                             Log.e(TAG, "here");
                             e.printStackTrace();
@@ -139,14 +142,16 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         List<Sensor> list = sensorManager.getSensorList(Sensor.TYPE_ALL);
         if (list.size() < 1) {
             Log.e(TAG, "No sensors returned from getSensorList");
-            textView.setText("No sensors returned from getSensorList");
+            String tex = "No sensors returned from getSensorList";
+            textView.setText(tex);
         }
         else{
             Sensor[] sensorArray = list.toArray(new Sensor[list.size()]);
             for (int i = 0; i < sensorArray.length; i++) {
                 Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
                 //set to fastest delay
-                sb.append("Found sensor " + i + " " + sensorArray[i].toString() + '\n');
+                String tex = "Found sensor " + i + " " + sensorArray[i].toString() + '\n';
+                sb.append(tex);
                 sensorManager.registerListener(this, sensorArray[i], sampling_rate);
 
             }
@@ -162,12 +167,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(WRITE_TO_FILE && isRecording){
-            WriteSensorEvent(sensorEvent.timestamp,sensorEvent.sensor.getType(), sensorEvent.values, sensorEvent.sensor.toString());
+            long time = (new Date()).getTime() + (sensorEvent.timestamp - System.nanoTime()) / 1000000L;
+            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
         }
     }
 
 
-    public void WriteSensorEvent(long time, int type, float[] values, String sensorInfo){
+    public void WriteSensorEvent(long time, int type, float[] values){
         try {
             String temp = String.valueOf(time) + ", " + String.valueOf(type) + ", " + Arrays.toString(values) + " \n";
             fos.write(temp.getBytes());
@@ -281,19 +287,19 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     }
 
-    private static Asset createAssetFromFile(String filepath) {
-        FileInputStream fileInputStream;
-        File file = new File(filepath);
-        byte[] bFile = new byte[(int) file.length()];
-
-        try {
-            //convert file into array of bytes
-            fileInputStream = new FileInputStream(file);
-            fileInputStream.read(bFile);
-            fileInputStream.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return Asset.createFromBytes(bFile);
-    }
+//    private static Asset createAssetFromFile(String filepath) {
+//        FileInputStream fileInputStream;
+//        File file = new File(filepath);
+//        byte[] bFile = new byte[(int) file.length()];
+//
+//        try {
+//            //convert file into array of bytes
+//            fileInputStream = new FileInputStream(file);
+//            fileInputStream.read(bFile);
+//            fileInputStream.close();
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+//        return Asset.createFromBytes(bFile);
+//    }
 }

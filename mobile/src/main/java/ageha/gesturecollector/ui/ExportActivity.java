@@ -109,7 +109,6 @@ public class ExportActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-
                         Runnable r = new Runnable() {
                             @Override
                             public void run() {
@@ -453,9 +452,6 @@ public class ExportActivity extends AppCompatActivity {
         } catch (IOException ioe) {
             Log.e("DataCollector", "IOException while writing Logfile");
         }
-        export_text.setText(getDataInfo());
-
-
     }
 
     private File getDocStorageDir(Context context, String albumName) {
