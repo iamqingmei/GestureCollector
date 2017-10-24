@@ -29,6 +29,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.List;
+
+import ageha.gesturecollector.data.Sensor;
+import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Toolbar mToolbar;
 
+    private SensorManager mSensorManager;
     private TextView status;
     private TextView empty_state;
     private EditText tester_name;
@@ -274,10 +279,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 //        this.mHandler = new Handler();
 //        this.mHandler.postDelayed(m_Runnable, 2000);
-        Log.i("MainActivity", "111");
         startService(new Intent(this, SensorReceiverService.class));
-        Log.i("MainActivity", "222");
-
+        mSensorManager = SensorManager.getInstance(this);
 
     }
 
@@ -292,6 +295,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //            mHandler.postDelayed(m_Runnable, 2000);
 //        }
 //    };
+    @Override
+    protected void onResume(){
+        super.onResume();
+        BusProvider.getInstance().register(this);
+        List<Sensor> sensors = mSensorManager.getInstance(this).getSensors();
+        String tmpStr = "";
+        for (Sensor sensor : sensors) {
+            tmpStr += sensor.getName();
+        }
+        Log.i("MainActivity", "sensor list: " + tmpStr);
+
+        mSensorManager.startMeasurement();
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BusProvider.getInstance().unregister(this);
+
+        mSensorManager.stopMeasurement();
+    }
 
     private void initToolbar() {
         setSupportActionBar(mToolbar);

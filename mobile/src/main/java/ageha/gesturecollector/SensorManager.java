@@ -1,26 +1,21 @@
 package ageha.gesturecollector;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import ageha.shared.*;
 import ageha.gesturecollector.data.Sensor;
-import ageha.gesturecollector.data.SensorNames;
 import ageha.gesturecollector.data.SensorDataPoint;
 import ageha.gesturecollector.event.BusProvider;
-import ageha.gesturecollector.event.SensorRangeEvent;
 import ageha.gesturecollector.event.SensorUpdatedEvent;
 import ageha.gesturecollector.event.NewSensorEvent;
 
@@ -33,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 
 
-public class SensorManager {
+class SensorManager {
     private static final String TAG = "SensorManager";
     private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
 
@@ -44,9 +39,9 @@ public class SensorManager {
 
     private SparseArray<Sensor> sensorMapping;
     private ArrayList<Sensor> sensors;
-    private SensorNames sensorNames;
+//    private SensorNames sensorNames;
 
-    public static synchronized SensorManager getInstance(Context context) {
+    static synchronized SensorManager getInstance(Context context) {
         if (instance == null) {
             instance = new SensorManager(context.getApplicationContext());
         }
@@ -69,12 +64,12 @@ public class SensorManager {
         return (ArrayList<Sensor>) sensors.clone();
     }
 
-    Sensor getSensor(long id) {
-        return sensorMapping.get((int) id);
-    }
+//    Sensor getSensor(String id) {
+//        return sensorMapping.get(id);
+//    }
 
-    private Sensor createSensor(int id) {
-        Sensor sensor = new Sensor(id, sensorNames.getName(id));
+    private Sensor createSensor(int id, String name) {
+        Sensor sensor = new Sensor(id, name);
 
         sensors.add(sensor);
         sensorMapping.append(id, sensor);
@@ -84,18 +79,18 @@ public class SensorManager {
         return sensor;
     }
 
-    private Sensor getOrCreateSensor(int id) {
-        Sensor sensor = sensorMapping.get(id);
+    private Sensor getOrCreateSensor(int sensorType, String sensorName) {
+        Sensor sensor = sensorMapping.get(sensorType);
 
         if (sensor == null) {
-            sensor = createSensor(id);
+            sensor = createSensor(sensorType, sensorName);
         }
 
         return sensor;
     }
 
-    synchronized void addSensorData(int sensorType, int accuracy, Timestamp timestamp, float[] values) {
-        Sensor sensor = getOrCreateSensor(sensorType);
+    synchronized void addSensorData(String sensorName, int sensorType, int accuracy, Timestamp timestamp, float[] values) {
+        Sensor sensor = getOrCreateSensor(sensorType, sensorName);
 
         // TODO: We probably want to pull sensor data point objects from a pool here
         SensorDataPoint dataPoint = new SensorDataPoint(timestamp, accuracy, values);
@@ -116,35 +111,35 @@ public class SensorManager {
         return result.isSuccess();
     }
 
-    void filterBySensorId(final int sensorId) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                filterBySensorIdInBackground(sensorId);
-            }
-        });
-    }
-
-    ;
-
-    private void filterBySensorIdInBackground(final int sensorId) {
-        Log.d(TAG, "filterBySensorId(" + sensorId + ")");
-
-        if (validateConnection()) {
-            PutDataMapRequest dataMap = PutDataMapRequest.create("/filter");
-
-            dataMap.getDataMap().putInt(DataMapKeys.FILTER, sensorId);
-            dataMap.getDataMap().putLong(DataMapKeys.TIMESTAMP, System.currentTimeMillis());
-
-            PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                @Override
-                public void onResult(DataApi.DataItemResult dataItemResult) {
-                    Log.d(TAG, "Filter by sensor " + sensorId + ": " + dataItemResult.getStatus().isSuccess());
-                }
-            });
-        }
-    }
+//    void filterBySensorId(final int sensorId) {
+//        executorService.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                filterBySensorIdInBackground(sensorId);
+//            }
+//        });
+//    }
+//
+//    ;
+//
+//    private void filterBySensorIdInBackground(final int sensorId) {
+//        Log.d(TAG, "filterBySensorId(" + sensorId + ")");
+//
+//        if (validateConnection()) {
+//            PutDataMapRequest dataMap = PutDataMapRequest.create("/filter");
+//
+//            dataMap.getDataMap().putInt(DataMapKeys.FILTER, sensorId);
+//            dataMap.getDataMap().putLong(DataMapKeys.TIMESTAMP, System.currentTimeMillis());
+//
+//            PutDataRequest putDataRequest = dataMap.asPutDataRequest();
+//            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+//                @Override
+//                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+//                    Log.d(TAG, "Filter by sensor " + sensorId + ": " + dataItemResult.getStatus().isSuccess());
+//                }
+//            });
+//        }
+//    }
 
     void startMeasurement() {
         executorService.submit(new Runnable() {
@@ -164,9 +159,9 @@ public class SensorManager {
         });
     }
 
-    void getNodes(ResultCallback<NodeApi.GetConnectedNodesResult> pCallback) {
-        Wearable.NodeApi.getConnectedNodes(googleApiClient).setResultCallback(pCallback);
-    }
+//    void getNodes(ResultCallback<NodeApi.GetConnectedNodesResult> pCallback) {
+//        Wearable.NodeApi.getConnectedNodes(googleApiClient).setResultCallback(pCallback);
+//    }
 
     private void controlMeasurementInBackground(final String path) {
         if (validateConnection()) {
@@ -180,7 +175,7 @@ public class SensorManager {
                         googleApiClient, node.getId(), path, null
                 ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                     @Override
-                    public void onResult(MessageApi.SendMessageResult sendMessageResult) {
+                    public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
                         Log.d(TAG, "controlMeasurementInBackground(" + path + "): " + sendMessageResult.getStatus().isSuccess());
                     }
                 });

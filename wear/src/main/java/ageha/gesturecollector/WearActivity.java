@@ -4,6 +4,7 @@ package ageha.gesturecollector;
 //import android.Manifest;
 import android.content.Context;
 //import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -67,7 +68,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        Let the app always on
         setAmbientEnabled();
         setContentView(R.layout.activity_main);
-
+        startService(new Intent(this, MessageReceiverService.class));
+        startService(new Intent(this, SensorService.class));
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
 
         dateBase = (new Date()).getTime();
@@ -156,8 +158,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         else{
             Sensor[] sensorArray = list.toArray(new Sensor[list.size()]);
             for (int i = 0; i < sensorArray.length; i++) {
-                Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
-                //set to fastest delay
+//                Log.i(TAG, "Found sensor " + i + " " + sensorArray[i].toString());
+//                //set to fastest delay
                 String tex = "Found sensor " + i + " " + sensorArray[i].toString() + '\n';
                 sb.append(tex);
                 sensorManager.registerListener(this, sensorArray[i], sampling_rate);
@@ -208,63 +210,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             Log.e(TAG, "here");
             e.printStackTrace();
         }
-//        try {
-//            fos.write(long2bytes(time));
-//            fos.write(int2bytes(type));
-//            for (int i=0; i< values.length; i++){
-//                fos.write(float2bytes(values[i]));
-//            }
-////            fos.write(float2bytes(values[0]));
-////            fos.write(float2bytes(values[1]));
-////            fos.write(float2bytes(values[2]));
-//            fos.write(sensorInfo.getBytes());
-//        } catch (IOException e) {
-//            Log.e(TAG, "here");
-//            e.printStackTrace();
-//        }
-
     }
 
-
-//    public synchronized byte[] int2bytes(int value){
-//        byte[] result = new byte[4];
-//        for(int i = 3; i>=0; i--){
-//            result[i] = (byte)(value & 0xFF);
-//            value >>= 8;
-//        }
-//        return result;
-//    }
-//
-//    public synchronized byte[] long2bytes(long value){
-//        byte[] result = new byte[8];
-//        for (int i = 7; i >= 0; i--) {
-//            result[i] = (byte)(value & 0xFF);
-//            value >>= 8;
-//        }
-//        return result;
-//    }
-
-//    public synchronized byte[] float2bytes(float value){
-//        return int2bytes(Float.floatToIntBits(value));
-//    }
-
-//    public synchronized byte[] double2bytes(double value){
-//        return long2bytes(Double.doubleToLongBits(value));
-//    }
-
     public File getDocStorageDir(Context context, String albumName) {
-//        if ((!isExternalStorageReadable()) | (!isExternalStorageWritable())){
-//            super.onStop();
-//            Log.e(TAG, "cannot excess to external storage!");
-//            return null;
-//        }
-//
-//        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//        if (permissionCheck != PackageManager.PERMISSION_GRANTED){
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.READ_CONTACTS},
-//                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-//        }
         File file = new File(context.getExternalFilesDir(
                 Environment.DIRECTORY_DOCUMENTS), albumName);
         if (!file.mkdirs()) {
@@ -272,22 +220,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         }
         return file;
     }
-
-    /* Checks if external storage is available for read and write */
-//    public boolean isExternalStorageWritable() {
-//        Log.i(TAG, "isExternalStorageWritable()");
-//        String state = Environment.getExternalStorageState();
-//        return Environment.MEDIA_MOUNTED.equals(state);
-//    }
-//
-//    /* Checks if external storage is available to at least read */
-//    public boolean isExternalStorageReadable() {
-//        Log.i(TAG, "isExternalStorageReadable()");
-//        String state = Environment.getExternalStorageState();
-//        return Environment.MEDIA_MOUNTED.equals(state) ||
-//                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-//    }
-
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -314,19 +246,4 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     }
 
-//    private static Asset createAssetFromFile(String filepath) {
-//        FileInputStream fileInputStream;
-//        File file = new File(filepath);
-//        byte[] bFile = new byte[(int) file.length()];
-//
-//        try {
-//            //convert file into array of bytes
-//            fileInputStream = new FileInputStream(file);
-//            fileInputStream.read(bFile);
-//            fileInputStream.close();
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
-//        return Asset.createFromBytes(bFile);
-//    }
 }

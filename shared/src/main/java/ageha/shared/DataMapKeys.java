@@ -9,4 +9,6 @@ public class DataMapKeys {
     public static final String TIMESTAMP = "timestamp";
     public static final String VALUES = "values";
     public static final String FILTER = "filter";
+    public static final String SENSORNAME = "sensorname";
+    public static final String SENSORPACK = "sensorpack";
 }

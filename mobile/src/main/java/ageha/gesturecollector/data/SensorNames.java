@@ -3,37 +3,32 @@ package ageha.gesturecollector.data;
 import android.hardware.*;
 import android.util.SparseArray;
 
+import java.util.ArrayList;
+
 /**
  * Created by Ageha on 8/10/17.
  */
 
 public class SensorNames {
-    public SparseArray<String> names;
+    public ArrayList<String> names;
 
     public SensorNames() {
-        names = new SparseArray<String>();
+        names = new ArrayList<>();
+        names.add(0, "light sensor");
+        names.add(1, "accelerometer");
+        names.add(2, "magnetic field sensor");
+        names.add(3, "gyroscope");
+        names.add(4, "quaternion");
+        names.add(5, "orientation");
+        names.add(6, "any motion detector");
+        names.add(7, "step counter");
+        names.add(8, "step detector");
+        names.add(9, "tilt sensor");
+        names.add(10, "significant motion detector");
+        names.add(11, "Gravity Sensor");
+        names.add(12, "Linear Acceleration Sensor");
 
-        names.append(0, "Debug Sensor");
 
-        names.append(android.hardware.Sensor.TYPE_ACCELEROMETER, "Accelerometer");
-        names.append(android.hardware.Sensor.TYPE_AMBIENT_TEMPERATURE, "Ambient temperatur");
-        names.append(android.hardware.Sensor.TYPE_GAME_ROTATION_VECTOR, "Game Rotation Vector");
-        names.append(android.hardware.Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR, "Geomagnetic Rotation Vector");
-        names.append(android.hardware.Sensor.TYPE_GRAVITY, "Gravity");
-        names.append(android.hardware.Sensor.TYPE_GYROSCOPE, "Gyroscope");
-        names.append(android.hardware.Sensor.TYPE_GYROSCOPE_UNCALIBRATED, "Gyroscope (Uncalibrated)");
-        names.append(android.hardware.Sensor.TYPE_HEART_RATE, "Heart Rate");
-        names.append(android.hardware.Sensor.TYPE_LIGHT, "Light");
-        names.append(android.hardware.Sensor.TYPE_LINEAR_ACCELERATION, "Linear Acceleration");
-        names.append(android.hardware.Sensor.TYPE_MAGNETIC_FIELD, "Magnetic Field");
-        names.append(android.hardware.Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED, "Magnetic Field (Uncalibrated)");
-        names.append(android.hardware.Sensor.TYPE_PRESSURE, "Pressure");
-        names.append(android.hardware.Sensor.TYPE_PROXIMITY, "Proximity");
-        names.append(android.hardware.Sensor.TYPE_RELATIVE_HUMIDITY, "Relative Humidity");
-        names.append(android.hardware.Sensor.TYPE_ROTATION_VECTOR, "Rotation Vector");
-        names.append(android.hardware.Sensor.TYPE_SIGNIFICANT_MOTION, "Significant Motion");
-        names.append(android.hardware.Sensor.TYPE_STEP_COUNTER, "Step Counter");
-        names.append(android.hardware.Sensor.TYPE_STEP_DETECTOR, "Step Detector");
     }
 
     public String getName(int sensorId) {

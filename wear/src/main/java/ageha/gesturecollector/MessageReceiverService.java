@@ -53,6 +53,7 @@ public class MessageReceiverService extends WearableListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "onCreate");
 
         deviceClient = DeviceClient.getInstance(this);
 
@@ -66,14 +67,13 @@ public class MessageReceiverService extends WearableListenerService {
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         Log.d(TAG, "onDataChanged: " + dataEvents);
-        if (!mGoogleApiClient.isConnected() || !mGoogleApiClient.isConnecting()) {
-            ConnectionResult connectionResult = mGoogleApiClient
-                    .blockingConnect(30, TimeUnit.SECONDS);
-            if (!connectionResult.isSuccess()) {
-                Log.e(TAG, "DataLayerListenerService failed to connect to GoogleApiClient, "
-                        + "error code: " + connectionResult.getErrorCode());
-                return;
-            }
+
+        ConnectionResult connectionResult =
+                mGoogleApiClient.blockingConnect(30, TimeUnit.SECONDS);
+
+        if (!connectionResult.isSuccess()) {
+            Log.e(TAG, "Failed to connect to GoogleApiClient.");
+            return;
         }
 
         // Loop through the events and send a message back to the node that created the data item.
