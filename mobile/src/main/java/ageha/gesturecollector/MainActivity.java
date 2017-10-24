@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText test_age;
     private EditText test_height;
     private RadioGroup test_genger;
+    private EditText test_weight;
 
     private TimeStart timer;
     private MakeBeepSound beep;
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_age = findViewById(R.id.text_input_age);
         this.test_height = findViewById(R.id.text_input_height);
         this.test_genger = findViewById(R.id.radioGrpGender);
+        this.test_weight = findViewById(R.id.text_input_weight);
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
 //        Menu mNavigationViewMenu = mNavigationView.getMenu();
@@ -300,14 +302,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         BusProvider.getInstance().register(this);
         List<Sensor> sensors = mSensorManager.getInstance(this).getSensors();
-        String tmpStr = "";
-        for (Sensor sensor : sensors) {
-            tmpStr += sensor.getName();
+        util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensors.size());
+
+        if (sensors.size() > 0){
+            mSensorManager.startMeasurement();
         }
-        Log.i("MainActivity", "sensor list: " + tmpStr);
-
-        mSensorManager.startMeasurement();
-
 
     }
 
@@ -359,29 +358,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.v("MainActivity","onConnected called");
     }
 
-    public void sendNotification(View view) {
-        Log.i("MainActivity", "sendNotification");
-        TextView editText = findViewById(R.id.editText);
-        if (editText.length() > 0) {
-            editText.setText(null);
-        }
-        String toSend = editText.getText().toString();
-        if(toSend.isEmpty())
-            toSend = "You sent an empty notification";
-
-        Notification notification = new NotificationCompat.Builder(getApplication())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Gesture Collector")
-                .setContentText(toSend)
-                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
-                .build();
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
-        int notificationId = 1;
-        notificationManager.notify(notificationId, notification);
-
-//        new SendActivityPhoneMessage("/testing_path", "hii").run();
-    }
+//    public void sendNotification(View view) {
+//        Log.i("MainActivity", "sendNotification");
+//        TextView editText = findViewById(R.id.editText);
+//        if (editText.length() > 0) {
+//            editText.setText(null);
+//        }
+//        String toSend = editText.getText().toString();
+//        if(toSend.isEmpty())
+//            toSend = "You sent an empty notification";
+//
+//        Notification notification = new NotificationCompat.Builder(getApplication())
+//                .setSmallIcon(R.mipmap.ic_launcher)
+//                .setContentTitle("Gesture Collector")
+//                .setContentText(toSend)
+//                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
+//                .build();
+//
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
+//        int notificationId = 1;
+//        notificationManager.notify(notificationId, notification);
+//
+////        new SendActivityPhoneMessage("/testing_path", "hii").run();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -440,12 +439,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             util.warning_msg(context, "No tester height");
             return false;
         }
+        else if (test_weight.getText().toString().isEmpty()){
+            util.warning_msg(context, "No tester weight");
+            return false;
+        }
         else{
             Integer tester_age_int;
             Integer tester_height_int;
+            Integer tester_weight_int;
             try{
                 tester_age_int = Integer.parseInt(test_age.getText().toString());
                 tester_height_int = Integer.parseInt(test_height.getText().toString());
+                tester_weight_int = Integer.parseInt(test_weight.getText().toString());
             } catch (NumberFormatException e){
                 Log.w("main_activity", "NumberFormatException: " + e.getMessage());
                 util.warning_msg(context, "Please input the correct age or height!");
@@ -458,6 +463,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             if ((tester_height_int > 240)||(tester_height_int<100)){
                 util.warning_msg(context, "Please input the correct height!");
+                return false;
+            }
+
+            if ((tester_weight_int > 100)||(tester_weight_int<20)){
+                util.warning_msg(context, "Please input the correct weight!");
                 return false;
             }
             return true;
@@ -496,7 +506,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         tester_name.getText().toString(),
                         Integer.parseInt(test_age.getText().toString()),
                         Integer.parseInt(test_height.getText().toString()),
-                        gender);
+                        gender,
+                        Integer.parseInt(test_weight.getText().toString()));
         String tex = "Action: \n" + tag;
         empty_state.setText(tex);
 //        registerTagUserInfo(gender);

@@ -1,6 +1,7 @@
 package ageha.gesturecollector.data;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 
 /**
  * Created by Ageha on 8/10/17.
@@ -27,5 +28,9 @@ public class SensorDataPoint {
 
     public int getAccuracy() {
         return accuracy;
+    }
+
+    public String toString(){
+        return (timestamp.toString() + ", " + accuracy + ", " + Arrays.toString(values));
     }
 }

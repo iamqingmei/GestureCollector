@@ -20,9 +20,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ageha.gesturecollector.TagManager;
+import ageha.gesturecollector.SensorManager;
+import ageha.gesturecollector.data.Sensor;
 import ageha.gesturecollector.data.TagData;
 import ageha.gesturecollector.R;
-import ageha.gesturecollector.database.DataEntry;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,14 +31,14 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
 import io.realm.Realm;
 
 public class ExportActivity extends AppCompatActivity {
-    private Realm mRealm;
-//    private ProgressBar dataProgressbar;
+    private ProgressBar dataProgressbar;
     private ProgressBar tagProgressbar;
     private final String TAG = "ExportActivity";
     private TextView export_text;
@@ -50,30 +51,30 @@ public class ExportActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_export);
 
-//        dataProgressbar = findViewById(R.id.export_progress);
+        dataProgressbar = findViewById(R.id.export_progress);
         tagProgressbar = findViewById(R.id.export_progress_tag);
 
         setSupportActionBar((Toolbar) findViewById(R.id.my_awesome_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTitle("Export Data");
-//        findViewById(R.id.exportDataButton).setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(final View v) {
-//                        Runnable r = new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                exportDataFile();
-//                            }
-//                        };
-//
-//                        Thread t = new Thread(r);
-//                        t.start();
-//                    }
-//                }
-//
-//        );
+        findViewById(R.id.exportDataButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        Runnable r = new Runnable() {
+                            @Override
+                            public void run() {
+                                exportDataFile();
+                            }
+                        };
+
+                        Thread t = new Thread(r);
+                        t.start();
+                    }
+                }
+
+        );
 
         findViewById(R.id.deleteTagButton).setOnClickListener(
                 new View.OnClickListener(){
@@ -124,37 +125,22 @@ public class ExportActivity extends AppCompatActivity {
         );
 
 
-//        findViewById(R.id.deleteButton).setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(final View v) {
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                deleteAllData();
-//                            }
-//                        }).start();
-//
-//                    }
-//                }
-//        );
-//
-//        findViewById(R.id.exportDeleteAllInOneButton).setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(final View v) {
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                exportDataFile();
-//                                exportTagsFile();
-//                                deleteAllData();
-//                            }
-//                        }).start();
-//
-//                    }
-//                }
-//        );
+        findViewById(R.id.deleteDataButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "deleteDataButton");
+                                SensorManager.getInstance(ExportActivity.this).DeleteAllSensors();
+                                export_text.setText(getDataInfo());
+                            }
+                        }).start();
+
+                    }
+                }
+        );
 
         export_text = findViewById(R.id.data_summary_text);
 
@@ -173,145 +159,113 @@ public class ExportActivity extends AppCompatActivity {
     }
 
     private String getDataInfo(){
-        mRealm = Realm.getInstance(this);
-        mRealm.beginTransaction();
-
-        String data_size = String.valueOf(mRealm.where(DataEntry.class).findAll().size());
+        ArrayList<Sensor> sensors = SensorManager.getInstance(ExportActivity.this).getSensors();
+        int DataPointSize = 0;
+        for (Sensor sensor: sensors){
+            DataPointSize += sensor.getDataPoints().size();
+        }
+        String data_size = String.valueOf(DataPointSize);
         String tag_size = String.valueOf(TagManager.getInstance(ExportActivity.this).getTags().size());
 
-        mRealm.commitTransaction();
-
-        return "Data Entry: " + data_size + " Tags: " + tag_size;
+        return "Data Points: " + data_size + " Tags: " + tag_size;
     }
-
-//    private void deleteAllData() {
-//        mRealm = Realm.getInstance(this);
-//        mRealm.beginTransaction();
-//
-//        RealmResults<DataEntry> result = mRealm.where(DataEntry.class).findAll();
-//        Log.e("DataCollector", "rows before delete = " + result.size());
-//        TagManager.getInstance(ExportActivity.this).DeleteTags();
-//
-//        // Delete all matches
-//        result.clear();
-//
-//
-//
-//        result = mRealm.where(DataEntry.class).findAll();
-//        Log.e("DataCollector", "rows after delete = " + result.size());
-//
-//        export_text.setText(getDataInfo());
-//        mRealm.commitTransaction();
-//
-//
-//    }
 
     @Override
     protected void onResume() {
         super.onResume();
     }
 
-//    private void exportDataFile() {
-//        mRealm = Realm.getInstance(this);
-//        mRealm.beginTransaction();
-//        RealmResults<DataEntry> result = mRealm.where(DataEntry.class).findAll();
-//        final int total_row = result.size();
-////        final int total_col = 8;
-//        Log.i("DataCollector", "total_row = " + total_row);
-//        final String fileprefix = "SensorData";
-//        final String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
-//        String filename = String.format("%s_%s.txt", fileprefix, date);
-//
-//        final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DataCollector";
-//
-//        final File logfile = new File(directory, filename);
-//        final File logPath = logfile.getParentFile();
-//
-//        try {
-//            FileWriter filewriter = new FileWriter(logfile);
-//            BufferedWriter bw = new BufferedWriter(filewriter);
-//
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    dataProgressbar.setMax(total_row);
-//                    dataProgressbar.setVisibility(View.VISIBLE);
-//                    dataProgressbar.setProgress(0);
-//                }
-//            });
-//
-//            // Write the string to the file
-//            bw.write("DeviceID,TimeStamp,X,Y,Z,Accuracy,DataSource,SensorID\n");
-//            for (int i = 1; i < total_row; i++) {
-//                final int progress = i;
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        dataProgressbar.setProgress(progress);
-//                    }
-//                });
-//
-//                String sb = result.get(i).getAndroidDevice() + " ," +
-//                        String.valueOf(
-//                                (new Date()).getTime() +
-//                                        (result.get(i).getTimestamp() - System.nanoTime()) / 1000000L) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getX()) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getY()) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getZ()) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getAccuracy()) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getDatasource()) +
-//                        " ," +
-//                        String.valueOf(result.get(i).getDatatype()) +
-//                        "\n";
-//                bw.write(sb);
-//            }
-//            bw.flush();
-//            bw.close();
-//
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            dataProgressbar.setVisibility(View.GONE);
-//                        }
-//                    }, 1000);
-//
-//                }
-//            });
-//
-//
-//            Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-//            emailIntent.setType("*/*");
-//
-//            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
-//                    "DataCollector data export");
-//            emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(logfile));
-//            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
-//
-//
-//            Log.i("DataCollector", "export finished!");
-//        } catch (IOException ioe) {
-//            Log.e("DataCollector", "IOException while writing Logfile");
-//        }
-//
-//        export_text.setText(getDataInfo());
-//        mRealm.commitTransaction();
-//    }
+    private void exportDataFile() {
+        SensorManager mSensorManager = SensorManager.getInstance(this);
+        ArrayList<Sensor> sensorList = mSensorManager.getSensors();
+
+        String res = "SENSORNAME, SENSORID, SENSORACCURACY, TIMESTAMP, ACCURACY, VALUES";
+        for (Sensor s:sensorList){
+            res += s.toString();
+        }
+
+        final int total_row = res.split("\r\n|\r|\n").length;
+        Log.i("GestureCollector", "total_row = " + total_row);
+        final String fileprefix = "SensorData";
+        final String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
+        String filename = String.format("%s_%s.txt", fileprefix, date);
+
+        final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/GestureCollector";
+
+        final File logfile = new File(directory, filename);
+        final File logPath = logfile.getParentFile();
+
+        if (!logPath.isDirectory() && !logPath.mkdirs()) {
+            Log.e(TAG, "Could not create directory for log files");
+        }
+
+        try {
+            FileWriter filewriter = new FileWriter(logfile);
+            BufferedWriter bw = new BufferedWriter(filewriter);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    dataProgressbar.setMax(total_row);
+                    dataProgressbar.setVisibility(View.VISIBLE);
+                    dataProgressbar.setProgress(0);
+                }
+            });
+
+            // Write the string to the file
+            bw.write("DeviceID,TimeStamp,X,Y,Z,Accuracy,DataSource,SensorID\n");
+            for (int i = 1; i < total_row; i++) {
+                final int progress = i;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dataProgressbar.setProgress(progress);
+                    }
+                });
+
+                bw.write(res);
+            }
+            bw.flush();
+            bw.close();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            dataProgressbar.setVisibility(View.GONE);
+                        }
+                    }, 1000);
+
+                }
+            });
+
+
+            Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+            emailIntent.setType("*/*");
+
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                    "GestureCollector data export");
+            emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(logfile));
+            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+
+
+            Log.i("GestureCollector", "export finished!");
+        } catch (IOException ioe) {
+            Log.e("GestureCollector", "IOException while writing Logfile");
+        }
+
+        export_text.setText(getDataInfo());
+    }
 
 
     private void exportTagsFile() {
         String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
         String filename = String.format("%s_%s.txt", "Tags", date);
 
-        final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DataCollector";
+        final String directory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/GestureCollector";
         final File logfile = new File(directory, filename);
         final File logPath = logfile.getParentFile();
         if (!logPath.isDirectory() && !logPath.mkdirs()) {
@@ -377,14 +331,14 @@ public class ExportActivity extends AppCompatActivity {
             emailIntent.setType("*/*");
 
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
-                    "DataCollector data export");
+                    "GestureCollector data export");
             emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(logfile));
             startActivity(Intent.createChooser(emailIntent, "Send mail..."));
 
 
-            Log.i("DataCollector", "export finished!");
+            Log.i("GestureCollector", "export finished!");
         } catch (IOException ioe) {
-            Log.e("DataCollector", "IOException while writing Logfile");
+            Log.e("GestureCollector", "IOException while writing Logfile");
         }
 
         export_text.setText(getDataInfo());
@@ -411,7 +365,7 @@ public class ExportActivity extends AppCompatActivity {
 
             int i = 0;
 //            fos.write(TagManager.getInstance(this).getUserInfo().getBytes());
-            fos.write(("TagName,TimeStamp,Tester_Name,Tester_Age,Tester_Height, Tester_Gender\n").getBytes());
+            fos.write(("TagName,TimeStamp,Tester_Name,Tester_Age,Tester_Height, Tester_Gender, Tester_Weight\n").getBytes());
             for (TagData tag : TagManager.getInstance(this).getTags()) {
                 final int progress = i;
                 runOnUiThread(new Runnable() {
@@ -426,7 +380,7 @@ public class ExportActivity extends AppCompatActivity {
                     tag.getName()+ ", " +
                     String.valueOf(tag.getAge())+ ", " +
                     String.valueOf(tag.getHeight())+ ", " +
-                    tag.getGender() + "\n").getBytes());
+                    tag.getGender() + String.valueOf(tag.getWeight()) + "\n").getBytes());
             }
             // Close
             if(fos!=null)
@@ -448,9 +402,9 @@ public class ExportActivity extends AppCompatActivity {
                 }
             });
 
-            Log.i("DataCollector", "export finished!");
+            Log.i("GestureCollector", "export finished!");
         } catch (IOException ioe) {
-            Log.e("DataCollector", "IOException while writing Logfile");
+            Log.e("GestureCollector", "IOException while writing Logfile");
         }
     }
 

@@ -173,23 +173,26 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         Log.w("WearActivity", "onBeep");
     }
 
-
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if(WRITE_TO_FILE && isRecording){
-//            long time = dateBase + (sensorEvent.timestamp - timeStampBase) / 1000000L;
-            // set reference times
-            if(sensorTimeReference == 0l && myTimeReference == 0l) {
-                sensorTimeReference = sensorEvent.timestamp;
-                myTimeReference = System.currentTimeMillis();
-            }
-            // set event timestamp to current time in milliseconds
-            long time = myTimeReference +
-                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
-
-            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
-        }
+        return;
     }
+//    @Override
+//    public void onSensorChanged(SensorEvent sensorEvent) {
+//        if(WRITE_TO_FILE && isRecording){
+////            long time = dateBase + (sensorEvent.timestamp - timeStampBase) / 1000000L;
+//            // set reference times
+//            if(sensorTimeReference == 0l && myTimeReference == 0l) {
+//                sensorTimeReference = sensorEvent.timestamp;
+//                myTimeReference = System.currentTimeMillis();
+//            }
+//            // set event timestamp to current time in milliseconds
+//            long time = myTimeReference +
+//                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
+//
+//            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
+//        }
+//    }
 
 
     public void WriteSensorEvent(long time, int type, float[] values){

@@ -38,8 +38,8 @@ public class TagManager {
         this.tags = new LinkedList<>();
     }
 
-    synchronized void addTag(String pTagName, String name, int age, int height, String gender) {
-        TagData tag = new TagData(pTagName, new Timestamp(System.currentTimeMillis()), name, age, height, gender);
+    synchronized void addTag(String pTagName, String name, int age, int height, String gender, int weight) {
+        TagData tag = new TagData(pTagName, new Timestamp(System.currentTimeMillis()), name, age, height, gender, weight);
         this.tags.add(tag);
 
         BusProvider.postOnMainThread(new TagAddedEvent(tag));

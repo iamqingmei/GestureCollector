@@ -6,13 +6,10 @@ import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.event.SensorRangeEvent;
 import java.util.LinkedList;
 
-/**
- * Created by Ageha on 8/10/17.
- */
 
 public class Sensor {
     private static final String TAG = "SensorDashboard/Sensor";
-    private static final int MAX_DATA_POINTS = 1000;
+//    private static final int MAX_DATA_POINTS = 1000;
 
     private long id;
     private String name;
@@ -45,9 +42,9 @@ public class Sensor {
     public synchronized void addDataPoint(SensorDataPoint dataPoint) {
         dataPoints.addLast(dataPoint);
 
-        if (dataPoints.size() > MAX_DATA_POINTS) {
-            dataPoints.removeFirst();
-        }
+//        if (dataPoints.size() > MAX_DATA_POINTS) {
+//            dataPoints.removeFirst();
+//        }
 
         boolean newLimits = false;
 
@@ -63,7 +60,7 @@ public class Sensor {
         }
 
         if (newLimits) {
-            Log.d(TAG, "New range for sensor " + id + ": " + minValue + " - " + maxValue);
+//            Log.d(TAG, "New range for sensor " + id + ": " + minValue + " - " + maxValue);
 
             BusProvider.postOnMainThread(new SensorRangeEvent(this));
         }
@@ -71,5 +68,14 @@ public class Sensor {
 
     public long getId() {
         return id;
+    }
+
+    public String toString(){
+        String res = "";
+        for (SensorDataPoint datapoint:this.dataPoints){
+            res += this.name + ',' + this.id + ", " + datapoint.toString() + '\n';
+        }
+
+        return res;
     }
 }

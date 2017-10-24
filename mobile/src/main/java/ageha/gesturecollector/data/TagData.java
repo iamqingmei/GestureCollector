@@ -9,14 +9,16 @@ public class TagData {
     private int age;
     private int height;
     private String gender;
+    private int weight;
 
-    public TagData(String pTagName, Timestamp pTimestamp, String name, int age, int height, String gender) {
+    public TagData(String pTagName, Timestamp pTimestamp, String name, int age, int height, String gender, int weight) {
         tagName = pTagName;
         timestamp = pTimestamp;
         this.name = name;
         this.age = age;
         this.height = height;
         this.gender = gender;
+        this.weight = weight;
     }
 
     public String getTagName() {
@@ -42,4 +44,6 @@ public class TagData {
     public String getGender(){
         return gender;
     }
+
+    public int getWeight() { return weight; }
 }

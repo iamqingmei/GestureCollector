@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 
 
-class SensorManager {
+public class SensorManager {
     private static final String TAG = "SensorManager";
     private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
 
@@ -41,7 +41,7 @@ class SensorManager {
     private ArrayList<Sensor> sensors;
 //    private SensorNames sensorNames;
 
-    static synchronized SensorManager getInstance(Context context) {
+    public static synchronized SensorManager getInstance(Context context) {
         if (instance == null) {
             instance = new SensorManager(context.getApplicationContext());
         }
@@ -60,7 +60,7 @@ class SensorManager {
         this.executorService = Executors.newCachedThreadPool();
     }
 
-    ArrayList<Sensor> getSensors() {
+    public ArrayList<Sensor> getSensors() {
         return (ArrayList<Sensor>) sensors.clone();
     }
 
@@ -90,6 +90,7 @@ class SensorManager {
     }
 
     synchronized void addSensorData(String sensorName, int sensorType, int accuracy, Timestamp timestamp, float[] values) {
+
         Sensor sensor = getOrCreateSensor(sensorType, sensorName);
 
         // TODO: We probably want to pull sensor data point objects from a pool here
@@ -183,5 +184,9 @@ class SensorManager {
         } else {
             Log.w(TAG, "No connection possible");
         }
+    }
+
+    public void DeleteAllSensors(){
+        sensors = null;
     }
 }

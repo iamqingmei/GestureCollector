@@ -59,7 +59,7 @@ public class SensorReceiverService extends WearableListenerService{
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-        Log.d(TAG, "onDataChanged()");
+//        Log.d(TAG, "onDataChanged()");
 
         for (DataEvent dataEvent : dataEvents) {
 
@@ -87,7 +87,7 @@ public class SensorReceiverService extends WearableListenerService{
         Timestamp timestamp = new Timestamp(dataMap.getLong(DataMapKeys.TIMESTAMP));
         float[] values = dataMap.getFloatArray(DataMapKeys.VALUES);
 
-        Log.d(TAG, "Received sensor data " + sensorType + " = " + Arrays.toString(values));
+//        Log.d(TAG, "Received sensor data " + sensorType + " = " + Arrays.toString(values));
 
         sensorManager.addSensorData(sensorName, sensorType, accuracy, timestamp, values);
     }
