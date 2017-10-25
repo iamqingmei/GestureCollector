@@ -36,7 +36,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.util.Arrays;
-import java.util.Date;
+//import java.util.Date;
 import java.util.List;
 
 
@@ -55,11 +55,10 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private GoogleApiClient mGoogleApiClient;
     private FileOutputStream fos = null;
     private StringBuilder sb = new StringBuilder("");
-    private long dateBase;
-    private long timeStampBase;
 
-    private long sensorTimeReference = 0l;
-    private long myTimeReference = 0l;
+    private long sensorTimeReference = 0L;
+    private long myTimeReference = 0L;
+    private Intent mSensorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +67,10 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        Let the app always on
         setAmbientEnabled();
         setContentView(R.layout.activity_main);
-        startService(new Intent(this, MessageReceiverService.class));
-        startService(new Intent(this, SensorService.class));
+//        startService(new Intent(this, MessageReceiverService.class));
+//        startService(new Intent(this, SensorService.class));
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
 
-        dateBase = (new Date()).getTime();
-        timeStampBase = System.nanoTime();
         TextView textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
         cb_write_to_file = findViewById(R.id.cb_write_to_file);
@@ -88,6 +85,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             @Override
             public void onClick(View arg0) {
                 android.os.Process.killProcess(android.os.Process.myPid());
+                stopService(mSensorService);
                 System.exit(1);
             }
         });
@@ -168,31 +166,30 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             textView.setText("Found " + sensorArray.length + " sensors");
         }
     }
-
+//
     public void onBeep(View view){
         Log.w("WearActivity", "onBeep");
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        return;
-    }
 //    @Override
 //    public void onSensorChanged(SensorEvent sensorEvent) {
-//        if(WRITE_TO_FILE && isRecording){
-////            long time = dateBase + (sensorEvent.timestamp - timeStampBase) / 1000000L;
-//            // set reference times
-//            if(sensorTimeReference == 0l && myTimeReference == 0l) {
-//                sensorTimeReference = sensorEvent.timestamp;
-//                myTimeReference = System.currentTimeMillis();
-//            }
-//            // set event timestamp to current time in milliseconds
-//            long time = myTimeReference +
-//                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
-//
-//            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
-//        }
+//        return;
 //    }
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if(WRITE_TO_FILE && isRecording){
+            // set reference times
+            if(sensorTimeReference == 0L && myTimeReference == 0L) {
+                sensorTimeReference = sensorEvent.timestamp;
+                myTimeReference = System.currentTimeMillis();
+            }
+            // set event timestamp to current time in milliseconds
+            long time = myTimeReference +
+                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
+
+            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
+        }
+    }
 
 
     public void WriteSensorEvent(long time, int type, float[] values){
@@ -249,4 +246,24 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        mSensorService = new Intent(this, SensorService.class);
+        startService(mSensorService);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        stopService(mSensorService);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        stopService(mSensorService);
+    }
 }

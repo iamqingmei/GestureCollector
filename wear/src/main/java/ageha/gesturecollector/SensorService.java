@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.SparseLongArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,12 +20,12 @@ import java.util.Locale;
 
 public class SensorService extends Service implements SensorEventListener {
     private static final String TAG = "SensorService";
-
-    private long sensorTimeReference = 0l;
-    private long myTimeReference = 0l;
+    private SparseLongArray lastSensorData;
+    private long sensorTimeReference = 0L;
+    private long myTimeReference = 0L;
     SensorManager mSensorManager;
     ArrayList<String> sensorEventBuffer;
-    private final int sensorEventBufferMaxiSize = 1000;
+//    private final int sensorEventBufferMaxiSize = 1000;
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
 
     private DeviceClient client;
@@ -36,15 +37,16 @@ public class SensorService extends Service implements SensorEventListener {
         Log.i(TAG, "onCreate");
         client = DeviceClient.getInstance(this);
 
-        Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("Sensor Dashboard");
-        builder.setContentText("Collecting sensor data..");
-        builder.setSmallIcon(ageha.gesturecollector.R.mipmap.ic_launcher);
+//        Notification.Builder builder = new Notification.Builder(this);
+//        builder.setContentTitle("Sensor Dashboard");
+//        builder.setContentText("Collecting sensor data..");
+//        builder.setSmallIcon(ageha.gesturecollector.R.mipmap.ic_launcher);
         System.out.print("TESTING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        startForeground(1, builder.build());
+//        startForeground(1, builder.build());
         startMeasurement();
 
         sensorEventBuffer = new ArrayList<String> ();
+        lastSensorData = new SparseLongArray();
     }
 
     @Override
@@ -91,7 +93,9 @@ public class SensorService extends Service implements SensorEventListener {
             // if the sensor type is not useful, skip it
             return;
         }
-        if(sensorTimeReference == 0l && myTimeReference == 0l) {
+
+        // calculate timestamp
+        if(sensorTimeReference == 0L && myTimeReference == 0L) {
             sensorTimeReference = event.timestamp;
             myTimeReference = System.currentTimeMillis();
         }

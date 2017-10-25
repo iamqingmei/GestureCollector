@@ -26,11 +26,8 @@ class DeviceClient {
     private static final String TAG = "DeviceClient";
     private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
     private SparseLongArray lastSensorData;
-    private long lastSendTime;
 
     private static DeviceClient instance;
-    private int filterId;
-    private String sensorDataBuffer = "";
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
     public static DeviceClient getInstance(Context context) {
         if (instance == null) {
