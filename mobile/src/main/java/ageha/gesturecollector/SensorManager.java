@@ -36,7 +36,7 @@ public class SensorManager {
 
     private ExecutorService executorService;
     private GoogleApiClient googleApiClient;
-
+    private boolean sensorDataLock = false;
     private SparseArray<Sensor> sensorMapping;
     private ArrayList<Sensor> sensors;
 //    private SensorNames sensorNames;
@@ -90,7 +90,9 @@ public class SensorManager {
     }
 
     synchronized void addSensorData(String sensorName, int sensorType, int accuracy, Timestamp timestamp, float[] values) {
-
+        if (sensorDataLock){
+            return;
+        }
         Sensor sensor = getOrCreateSensor(sensorType, sensorName);
 
         // TODO: We probably want to pull sensor data point objects from a pool here
@@ -187,6 +189,16 @@ public class SensorManager {
     }
 
     public void DeleteAllSensors(){
-        sensors = null;
+        sensors = new ArrayList<>();
+    }
+
+    public String getSensorDataString(){
+        String res = "SENSORNAME, SENSORID, SENSORACCURACY, TIMESTAMP, ACCURACY, VALUES";
+        sensorDataLock = true;
+        for (Sensor s:this.sensors){
+            res += s.toString();
+        }
+        sensorDataLock = false;
+        return res;
     }
 }
