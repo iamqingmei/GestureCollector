@@ -19,6 +19,8 @@ import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.event.SensorUpdatedEvent;
 import ageha.gesturecollector.event.NewSensorEvent;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +82,7 @@ public class SensorManager {
     }
 
     private Sensor getOrCreateSensor(int sensorType, String sensorName) {
+
         Sensor sensor = sensorMapping.get(sensorType);
 
         if (sensor == null) {
@@ -190,6 +193,7 @@ public class SensorManager {
 
     public void DeleteAllSensors(){
         sensors = new ArrayList<>();
+
     }
 
     public String getSensorDataString(){
@@ -200,5 +204,10 @@ public class SensorManager {
         }
         sensorDataLock = false;
         return res;
+    }
+
+
+    public boolean getConnectionState(){
+        return sensors.size() != 0;
     }
 }

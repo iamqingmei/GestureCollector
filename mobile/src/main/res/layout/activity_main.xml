@@ -41,6 +41,15 @@
                 android:text="CountDown: IDLE"
                 android:textSize="30sp"/>
 
+            <TextView
+                android:id="@+id/connection_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="watch connection: false "
+                android:textSize="20sp"/>
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -49,26 +58,35 @@
             android:orientation="vertical"
             android:layout_gravity="center"
             android:layout_alignParentBottom="true">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFcccccc"
                 android:elevation="0dp"
-                android:orientation="horizontal"
-                android:padding="0dp"
-                android:weightSum="1">
+                android:padding="0dp">
+
                 <EditText
                     android:id="@+id/text_input_name"
+                    android:layout_width="90dp"
                     android:layout_height="wrap_content"
                     android:hint="@string/name_hint"
-                    android:layout_width="90dp"
-                    android:inputType="text"/>
+                    android:inputType="text" />
+
                 <EditText
                     android:id="@+id/text_input_weight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:hint="Weight in KG"
                     android:inputType="number" />
+
+                <Button
+                    android:id="@+id/button_refresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="70dp"
+                    android:text="REFRESH" />
+
             </LinearLayout>
 
             <LinearLayout

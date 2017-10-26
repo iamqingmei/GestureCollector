@@ -29,13 +29,16 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import ageha.gesturecollector.data.Sensor;
 import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
     static final private int count_down_time = 4;
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText test_height;
     private RadioGroup test_genger;
     private EditText test_weight;
+    private TextView connection_state;
 
     private TimeStart timer;
     private MakeBeepSound beep;
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_height = findViewById(R.id.text_input_height);
         this.test_genger = findViewById(R.id.radioGrpGender);
         this.test_weight = findViewById(R.id.text_input_weight);
+        this.connection_state = findViewById(R.id.connection_state);
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
 //        Menu mNavigationViewMenu = mNavigationView.getMenu();
@@ -96,6 +101,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initToolbar();
 
 //        WearManager wearManager = WearManager.getInstance(this);
+        findViewById(R.id.button_refresh).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState()
+                + "\n" + getDataInfo());
+            }
+        });
+
         findViewById(ageha.gesturecollector.R.id.tag0_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        this.mHandler.postDelayed(m_Runnable, 2000);
         startService(new Intent(this, SensorReceiverService.class));
         mSensorManager = SensorManager.getInstance(this);
-
     }
 
 
@@ -307,8 +319,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (sensors.size() > 0){
             mSensorManager.startMeasurement();
         }
-
+        connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState());
     }
+
 
     @Override
     protected void onPause() {
@@ -517,6 +530,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
         Log.v("MainActivity", "onStart called");
+        connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState());
     }
 
 //    private class SendActivityPhoneMessage extends Thread {
@@ -562,4 +576,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //    private void registerTagUserInfo(String gender){
 //        TagManager.getInstance(MainActivity.this).addUserInfo("name: " + tester_name.getText().toString() + " age: " + test_age.getText().toString() + " height: " + test_height.getText().toString() + "gender: " + gender + "\n");
 //    }
+
+    private String getDataInfo(){
+        ArrayList<Sensor> sensors = mSensorManager.getSensors();
+        int DataPointSize = 0;
+        for (Sensor sensor: sensors){
+            DataPointSize += sensor.getDataPoints().size();
+        }
+        String data_size = String.valueOf(DataPointSize);
+        String tag_size = String.valueOf(TagManager.getInstance(MainActivity.this).getTags().size());
+
+        return "Data Points: " + data_size + " Tags: " + tag_size;
+    }
+
 }
