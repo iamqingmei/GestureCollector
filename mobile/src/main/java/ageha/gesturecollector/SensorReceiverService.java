@@ -59,7 +59,7 @@ public class SensorReceiverService extends WearableListenerService{
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-//        Log.d(TAG, "onDataChanged()");
+        Log.d(TAG, "onDataChanged()");
 
         for (DataEvent dataEvent : dataEvents) {
 
@@ -67,15 +67,26 @@ public class SensorReceiverService extends WearableListenerService{
                 DataItem dataItem = dataEvent.getDataItem();
                 Uri uri = dataItem.getUri();
                 String path = uri.getPath();
-
-                if (path.startsWith("/sensors/")) {
+                Log.i(TAG, uri.getPath());
+                if (path.startsWith("/sensors/datapoint")) {
                     unpackSensorData(
                             Integer.parseInt(uri.getLastPathSegment()),
                             DataMapItem.fromDataItem(dataItem).getDataMap()
                     );
-                } else{
-                    Log.i(TAG, dataEvent.toString());
                 }
+
+                if (path.startsWith("/sensors/sensorpacks")){
+                    Log.i(TAG, "sensor pack received");
+                    unpackSensorPackData(DataMapItem.fromDataItem(dataItem).getDataMap());
+                }
+
+                if (path.startsWith("/sensors/sensorcount")){
+                    Log.i(TAG, "sensor count received");
+                    Log.i(TAG, "count" + DataMapItem.fromDataItem(dataItem).getDataMap().getInt(DataMapKeys.SENSORCOUNT));
+                }
+
+
+
             }
         }
     }
@@ -92,5 +103,8 @@ public class SensorReceiverService extends WearableListenerService{
         sensorManager.addSensorData(sensorName, sensorType, accuracy, timestamp, values);
     }
 //
+    private void unpackSensorPackData(DataMap dataMap) {
+        sensorManager.addSensorDataPack(dataMap.getString(DataMapKeys.SENSORPACK));
+    }
 
 }
