@@ -3,6 +3,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -24,20 +25,31 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import ageha.gesturecollector.data.Sensor;
 import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
+import ageha.shared.DataMapKeys;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
     static final private int count_down_time = 4;
     static final private int action_time = 5;
+    static final private String TAG = "MainActivity";
 
     private Toolbar mToolbar;
 
@@ -50,10 +62,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RadioGroup test_genger;
     private EditText test_weight;
     private TextView connection_state;
-
+    private TextView data_state;
     private TimeStart timer;
     private MakeBeepSound beep;
-
 
     GoogleApiClient mGoogleApiClient;
     @Override
@@ -71,36 +82,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_genger = findViewById(R.id.radioGrpGender);
         this.test_weight = findViewById(R.id.text_input_weight);
         this.connection_state = findViewById(R.id.connection_state);
+        this.data_state = findViewById(R.id.data_state);
+
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
-//        Menu mNavigationViewMenu = mNavigationView.getMenu();
         timer = new TimeStart();
         beep = new MakeBeepSound(100, 150);
 
-        if(null == mGoogleApiClient) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-            Log.v("MainActivity", "GoogleApiClient created");
-        }
-
-        if(!mGoogleApiClient.isConnected()){
-            mGoogleApiClient.connect();
-            Log.v("MainActivity", "Connecting to GoogleApiClient..");
-        }
-//        final Handler handler = new Handler();
-//        final Runnable refresh;
-
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
         initToolbar();
 
-//        WearManager wearManager = WearManager.getInstance(this);
         findViewById(R.id.button_refresh).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState()
-                + "\n" + getDataInfo());
+                String temp = "Watch Connection: " + mSensorManager.getConnectionState();
+                connection_state.setText(temp);
+                data_state.setText(getDataInfo());
             }
         });
 
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 //        this.mHandler = new Handler();
 //        this.mHandler.postDelayed(m_Runnable, 2000);
-        startService(new Intent(this, SensorReceiverService.class));
+//        startService(new Intent(this, SensorReceiverService.class));
         mSensorManager = SensorManager.getInstance(this);
     }
 
@@ -307,6 +308,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume(){
         super.onResume();
+        mGoogleApiClient.connect();
         BusProvider.getInstance().register(this);
         List<Sensor> sensors = SensorManager.getInstance(this).getSensors();
         util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensors.size());
@@ -316,12 +318,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         String temp = "Watch Connection: " + mSensorManager.getConnectionState();
         connection_state.setText(temp);
+        data_state.setText(getDataInfo());
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
+        Wearable.DataApi.removeListener(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
         BusProvider.getInstance().unregister(this);
 
         mSensorManager.stopMeasurement();
@@ -363,8 +368,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onConnected(Bundle connectionHint) {
-        Log.v("MainActivity","onConnected called");
+    public void onConnected(Bundle bundle) {
+        Wearable.DataApi.addListener(mGoogleApiClient, this);
     }
 
 //    public void sendNotification(View view) {
@@ -576,6 +581,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String getDataInfo(){
         ArrayList<Sensor> sensors = mSensorManager.getSensors();
+        int sensorPackSize = mSensorManager.getSensorDataPack().length();
         int DataPointSize = 0;
         for (Sensor sensor: sensors){
             DataPointSize += sensor.getDataPoints().size();
@@ -583,7 +589,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String data_size = String.valueOf(DataPointSize);
         String tag_size = String.valueOf(TagManager.getInstance(MainActivity.this).getTags().size());
 
-        return "Data Points: " + data_size + " Tags: " + tag_size;
+        return "Data Points: " + data_size + " Tags: " + tag_size + " Pack: " + sensorPackSize;
     }
 
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        Log.d(TAG, "onDataChanged()");
+
+        for (DataEvent dataEvent : dataEvents) {
+
+            if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
+                DataItem dataItem = dataEvent.getDataItem();
+                Uri uri = dataItem.getUri();
+                String path = uri.getPath();
+                Log.i(TAG, uri.getPath());
+                if (path.startsWith("/sensors/datapoint")) {
+                    unpackSensorData(
+                            Integer.parseInt(uri.getLastPathSegment()),
+                            DataMapItem.fromDataItem(dataItem).getDataMap()
+                    );
+                }
+
+                if (path.startsWith("/sensors/sensorpacks")){
+                    Log.i(TAG, "sensor pack received");
+                    unpackSensorPackData(DataMapItem.fromDataItem(dataItem).getDataMap());
+                }
+
+                if (path.startsWith("/sensors/sensorcount")){
+                    Log.i(TAG, "sensor count received");
+                    Log.i(TAG, "count" + DataMapItem.fromDataItem(dataItem).getDataMap().getInt(DataMapKeys.SENSORCOUNT));
+                }
+
+
+
+            }
+        }
+    }
+
+    private void unpackSensorData(int sensorType, DataMap dataMap) {
+//        Log.w("TEST", dataMap.keySet().toString()); [accuracy, timestamp, values]
+        String sensorName = dataMap.getString(DataMapKeys.SENSORNAME);
+        int accuracy = dataMap.getInt(DataMapKeys.ACCURACY);
+        Timestamp timestamp = new Timestamp(dataMap.getLong(DataMapKeys.TIMESTAMP));
+        float[] values = dataMap.getFloatArray(DataMapKeys.VALUES);
+
+//        Log.d(TAG, "Received sensor data " + sensorType + " = " + Arrays.toString(values));
+
+        mSensorManager.addSensorData(sensorName, sensorType, accuracy, timestamp, values);
+    }
+    //
+    private void unpackSensorPackData(DataMap dataMap) {
+        mSensorManager.addSensorDataPack(dataMap.getString(DataMapKeys.SENSORPACK));
+    }
 }

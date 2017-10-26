@@ -11,4 +11,5 @@ public class DataMapKeys {
     public static final String FILTER = "filter";
     public static final String SENSORNAME = "sensorname";
     public static final String SENSORPACK = "sensorpack";
+    public static final String SENSORCOUNT = "sensorcount";
 }

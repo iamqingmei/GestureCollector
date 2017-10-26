@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".SensorService" />
+        <!--<service android:name=".SensorService" />-->
     </application>
 
 </manifest>

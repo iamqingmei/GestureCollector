@@ -39,6 +39,7 @@ public class SensorManager {
     private boolean sensorDataLock = false;
     private SparseArray<Sensor> sensorMapping;
     private ArrayList<Sensor> sensors;
+    private String sensorDataPack = "";
 //    private SensorNames sensorNames;
 
     public static synchronized SensorManager getInstance(Context context) {
@@ -200,6 +201,7 @@ public class SensorManager {
         for (Sensor s:this.sensors){
             res += s.toString();
         }
+        res += getSensorDataPack();
         sensorDataLock = false;
         return res;
     }
@@ -207,5 +209,15 @@ public class SensorManager {
 
     boolean getConnectionState(){
         return sensors.size() != 0;
+    }
+
+    public void addSensorDataPack(String sensorDataPack){
+        // TODO parse the sensor data pack
+//        Log.w(TAG, sensorDataPack);
+        this.sensorDataPack += sensorDataPack;
+    }
+
+    public String getSensorDataPack(){
+        return this.sensorDataPack;
     }
 }

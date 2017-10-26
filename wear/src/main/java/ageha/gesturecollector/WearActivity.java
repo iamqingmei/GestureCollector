@@ -4,11 +4,13 @@ package ageha.gesturecollector;
 //import android.Manifest;
 import android.content.Context;
 //import android.content.pm.PackageManager;
-import android.content.Intent;
+//import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -25,10 +27,13 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.wearable.Asset;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
 //import com.google.android.gms.wearable.PutDataMapRequest;
 //import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
@@ -37,7 +42,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.util.Arrays;
 //import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import ageha.shared.DataMapKeys;
 
 
 public class WearActivity extends WearableActivity implements SensorEventListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -49,6 +58,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private String file_path;
     private boolean WRITE_TO_FILE = false;
     private boolean isRecording = false;
+    private boolean send_to_mobile = false;
     private Button btn_record;
     private CheckBox cb_write_to_file;
 
@@ -56,10 +66,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private FileOutputStream fos = null;
     private StringBuilder sb = new StringBuilder("");
 
+    private int send_count = 0;
     private long sensorTimeReference = 0L;
     private long myTimeReference = 0L;
-    private Intent mSensorService;
+    private DeviceClient client;
+    private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
 
+//    private String sensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -70,6 +83,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        startService(new Intent(this, MessageReceiverService.class));
 //        startService(new Intent(this, SensorService.class));
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
+        client = DeviceClient.getInstance(this);
 
         TextView textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
@@ -85,8 +99,15 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             @Override
             public void onClick(View arg0) {
                 android.os.Process.killProcess(android.os.Process.myPid());
-                stopService(mSensorService);
+//                stopService(new Intent(getApplicationContext(), SensorService.class));
                 System.exit(1);
+            }
+        });
+
+        findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                send_to_mobile = true;
             }
         });
 
@@ -122,13 +143,11 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     WRITE_TO_FILE = cb_write_to_file.isChecked();
                     cb_write_to_file.setEnabled(false);
                     if(WRITE_TO_FILE) {
-                        FILENAME = System.currentTimeMillis()+"_b";
+                        FILENAME = "SENSORDATA" + System.currentTimeMillis()+".txt";
                         file_path = getDocStorageDir(getBaseContext(),"DATA").getAbsolutePath()+"/"+FILENAME;
                         Log.i(TAG, "file path" + file_path);
                         try {
                             fos = new FileOutputStream(new File(file_path));
-                            // calibration purpose
-                            // WriteSensorEvent(1234,1234,new float[]{1.2f,2.3f,3.4f},new Quaternion(0.1,new Vec3(1.2,2.3,3.4)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -146,7 +165,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
 //        Register Sensors
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
         List<Sensor> list = sensorManager.getSensorList(Sensor.TYPE_ALL);
         if (list.size() < 1) {
             Log.e(TAG, "No sensors returned from getSensorList");
@@ -176,19 +194,39 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        return;
 //    }
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        if(WRITE_TO_FILE && isRecording){
-            // set reference times
-            if(sensorTimeReference == 0L && myTimeReference == 0L) {
-                sensorTimeReference = sensorEvent.timestamp;
-                myTimeReference = System.currentTimeMillis();
-            }
-            // set event timestamp to current time in milliseconds
-            long time = myTimeReference +
-                    Math.round((sensorEvent.timestamp - sensorTimeReference) / 1000000.0);
-
-            WriteSensorEvent(time,sensorEvent.sensor.getType(), sensorEvent.values);
+    public void onSensorChanged(SensorEvent event) {
+        // calculate timestamp
+        if(sensorTimeReference == 0L && myTimeReference == 0L) {
+            sensorTimeReference = event.timestamp;
+            myTimeReference = System.currentTimeMillis();
         }
+        // set event timestamp to current time in milliseconds
+        long time = myTimeReference +
+                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+
+        if (!usefulSensor.contains(event.sensor.getType())){
+            // if the sensor type is not useful, skip it
+            return;
+        }
+
+        if(WRITE_TO_FILE && isRecording){
+            WriteSensorEvent(time,event.sensor.getType(), event.values);
+        }
+
+//        sensorEventBuffer += sensorEventToString(event.sensor.getName(), time, event.sensor.getType(), event.values, event.accuracy);
+//
+//        if (System.currentTimeMillis() - lastSendTime < 1000){
+//            return;
+//        }
+        if (send_to_mobile){
+            client.sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
+        }
+//        lastSendTime = System.currentTimeMillis();
+//        client.sendSensorDataPack(sensorEventBuffer);
+//        sensorEventBuffer = "";
+//         client.sendCount();
+//        sendCount();
+//        sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
     }
 
 
@@ -210,6 +248,22 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             Log.e(TAG, "here");
             e.printStackTrace();
         }
+    }
+
+    public String sensorEventToString(String name, long time, int type, float[] values, int acc){
+//        "SENSORNAME, SENSORID, TIMESTAMP, ACCURACY, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5\n";
+        String temp = name + ',' + String.valueOf(type) + ',' + String.valueOf(time) + ", " + String.valueOf(acc);
+        for (int i = 0; i < 5; i++){
+            if (i<values.length){
+                temp = temp + ", " + String.valueOf(values[i]);
+
+            } else {
+                temp = temp + ", ";
+            }
+
+        }
+        temp += '\n';
+        return temp;
     }
 
     public File getDocStorageDir(Context context, String albumName) {
@@ -249,21 +303,42 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onResume(){
         super.onResume();
-
-        mSensorService = new Intent(this, SensorService.class);
-        startService(mSensorService);
+        mGoogleApiClient.connect();
+//        startService(new Intent(this, SensorService.class));
     }
 
     @Override
     public void onPause(){
         super.onPause();
-
-        stopService(mSensorService);
+//        stopService(new Intent(this, SensorService.class));
+        Wearable.DataApi.removeListener(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
-        stopService(mSensorService);
+//        stopService(new Intent(this, SensorService.class));
+    }
+
+
+    private void sendCount(){
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/sensorcount");
+        Log.i(TAG, "run() " + send_count);
+        dataMap.getDataMap().putInt(DataMapKeys.SENSORCOUNT, send_count);
+        send_count += 1;
+        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
+        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
+    }
+
+    private void sendSensorData(String sensorName, int sensorType, int accuracy, long timestamp, float[] values) {
+        Log.i(TAG, "sendSensorData");
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/datapoint/" + sensorType);
+        dataMap.getDataMap().putString(DataMapKeys.SENSORNAME, sensorName);
+        dataMap.getDataMap().putInt(DataMapKeys.ACCURACY, accuracy);
+        dataMap.getDataMap().putLong(DataMapKeys.TIMESTAMP, timestamp);
+        dataMap.getDataMap().putFloatArray(DataMapKeys.VALUES, values);
+        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
     }
 }

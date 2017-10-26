@@ -8,6 +8,7 @@ import android.util.SparseLongArray;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
@@ -26,7 +27,7 @@ class DeviceClient {
     private static final String TAG = "DeviceClient";
     private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
     private SparseLongArray lastSensorData;
-
+    private int send_count = 0;
     private static DeviceClient instance;
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
     public static DeviceClient getInstance(Context context) {
@@ -74,28 +75,36 @@ class DeviceClient {
             }
         });
     }
-//    void sendSensorDataPack(final String sensorDataPack){
-//        long timeAgo = System.currentTimeMillis() - lastSendTime;
-//        sensorDataBuffer += sensorDataPack;
-//        if (timeAgo < 1000){
-//            return;
-//        }
-//        Log.i(TAG, "sendSensorDataPack");
-//        lastSendTime = System.currentTimeMillis();
-//        executorService.submit(new Runnable() {
-//            @Override
-//            public void run() {
-//                sendPackedSensorDataInBackground(sensorDataBuffer);
-//            }
-//        });
-//        sensorDataBuffer = "";
-//    }
-//    private void sendPackedSensorDataInBackground(String sensorDataPack){
-//        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/sensorPack");
-//        dataMap.getDataMap().putString(DataMapKeys.SENSORPACK, sensorDataPack);
-//        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-//        send(putDataRequest);
-//    }
+
+    void sendSensorDataPack(final String sensorDataPack){
+        Log.i(TAG, "sendSensorDataPack");
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                sendPackedSensorDataInBackground(sensorDataPack);
+            }
+        });
+    }
+    void sendCount(){
+        Log.i(TAG, "sendCount: " + send_count);
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/sensorcount");
+                Log.i(TAG, "run() " + send_count);
+                dataMap.getDataMap().putInt(DataMapKeys.SENSORCOUNT, send_count);
+                PutDataRequest putDataRequest = dataMap.asPutDataRequest();
+                send(putDataRequest);
+            }
+        });
+        send_count += 1;
+    }
+    private void sendPackedSensorDataInBackground(String sensorDataPack){
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/sensorpacks");
+        dataMap.getDataMap().putString(DataMapKeys.SENSORPACK, sensorDataPack);
+        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
+        send(putDataRequest);
+    }
 
     private void sendSensorDataInBackground(String sensorName, int sensorType, int accuracy, long timestamp, float[] values) {
 //        if (sensorType == filterId) {
@@ -104,7 +113,7 @@ class DeviceClient {
 //            Log.d(TAG, "Sensor " + sensorType + " = " + Arrays.toString(values));
 //        }
 
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/" + sensorType);
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/datapoint/" + sensorType);
         dataMap.getDataMap().putString(DataMapKeys.SENSORNAME, sensorName);
         dataMap.getDataMap().putInt(DataMapKeys.ACCURACY, accuracy);
         dataMap.getDataMap().putLong(DataMapKeys.TIMESTAMP, timestamp);
@@ -124,14 +133,15 @@ class DeviceClient {
     }
 
     private void send(PutDataRequest putDataRequest) {
-//        Log.i(TAG, "send()");
-        if (validateConnection()) {
-            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                @Override
-                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+        Log.i(TAG, "send()");
+//        if (validateConnection()) {
+//            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+//                @Override
+//                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
 //                    Log.v(TAG, "Sending sensor data: " + dataItemResult.getStatus().isSuccess());
-                }
-            });
-        }
+//                }
+//            });
+//        }
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(googleApiClient, putDataRequest);
     }
 }
