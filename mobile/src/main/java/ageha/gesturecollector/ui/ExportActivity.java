@@ -360,7 +360,7 @@ public class ExportActivity extends AppCompatActivity {
                     tag.getName()+ ", " +
                     String.valueOf(tag.getAge())+ ", " +
                     String.valueOf(tag.getHeight())+ ", " +
-                    tag.getGender() + String.valueOf(tag.getWeight()) + "\n").getBytes());
+                    tag.getGender() + ", " +String.valueOf(tag.getWeight()) + "\n").getBytes());
             }
             // Close
             if(fos!=null)

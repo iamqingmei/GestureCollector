@@ -1,5 +1,4 @@
 package ageha.gesturecollector;
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -7,11 +6,9 @@ import android.media.ToneGenerator;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -29,8 +26,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -313,13 +308,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume(){
         super.onResume();
         BusProvider.getInstance().register(this);
-        List<Sensor> sensors = mSensorManager.getInstance(this).getSensors();
+        List<Sensor> sensors = SensorManager.getInstance(this).getSensors();
         util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensors.size());
 
         if (sensors.size() > 0){
             mSensorManager.startMeasurement();
         }
-        connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState());
+        String temp = "Watch Connection: " + mSensorManager.getConnectionState();
+        connection_state.setText(temp);
     }
 
 
@@ -530,7 +526,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
         Log.v("MainActivity", "onStart called");
-        connection_state.setText("Watch Connection: " + mSensorManager.getConnectionState());
+        String temp = "Watch Connection: " + mSensorManager.getConnectionState();
+        connection_state.setText(temp);
     }
 
 //    private class SendActivityPhoneMessage extends Thread {

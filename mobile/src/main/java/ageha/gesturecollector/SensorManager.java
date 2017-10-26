@@ -19,8 +19,6 @@ import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.event.SensorUpdatedEvent;
 import ageha.gesturecollector.event.NewSensorEvent;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -207,7 +205,7 @@ public class SensorManager {
     }
 
 
-    public boolean getConnectionState(){
+    boolean getConnectionState(){
         return sensors.size() != 0;
     }
 }
