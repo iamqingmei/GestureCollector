@@ -309,6 +309,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume(){
         super.onResume();
         mGoogleApiClient.connect();
+        Wearable.DataApi.addListener(mGoogleApiClient, this);
         BusProvider.getInstance().register(this);
         List<Sensor> sensors = SensorManager.getInstance(this).getSensors();
         util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensors.size());
@@ -369,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onConnected(Bundle bundle) {
+        util.warning_msg(getApplicationContext(), "Connected!");
         Wearable.DataApi.addListener(mGoogleApiClient, this);
     }
 

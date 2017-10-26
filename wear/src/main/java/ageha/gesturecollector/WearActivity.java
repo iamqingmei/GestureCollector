@@ -71,7 +71,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private long myTimeReference = 0L;
     private DeviceClient client;
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
-
+    private int write_count = 0;
+    private TextView textView;
 //    private String sensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +86,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
         client = DeviceClient.getInstance(this);
 
-        TextView textView = findViewById(R.id.text);
+        textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
         cb_write_to_file = findViewById(R.id.cb_write_to_file);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -252,6 +253,11 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             }
             temp += '\n';
             fos.write(temp.getBytes());
+            write_count += 1;
+            if (write_count % 10000 == 0){
+                Log.i(TAG, "write count: " + write_count);
+                textView.setText("write count: " + write_count);
+            }
         } catch (IOException e) {
             Log.e(TAG, "here");
             e.printStackTrace();

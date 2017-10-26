@@ -134,14 +134,14 @@ class DeviceClient {
 
     private void send(PutDataRequest putDataRequest) {
         Log.i(TAG, "send()");
-//        if (validateConnection()) {
-//            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-//                @Override
-//                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
-//                    Log.v(TAG, "Sending sensor data: " + dataItemResult.getStatus().isSuccess());
-//                }
-//            });
-//        }
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(googleApiClient, putDataRequest);
+        if (validateConnection()) {
+            Wearable.DataApi.putDataItem(googleApiClient, putDataRequest).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                @Override
+                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+                    Log.v(TAG, "Sending sensor data: " + dataItemResult.getStatus().isSuccess());
+                }
+            });
+        }
+//        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(googleApiClient, putDataRequest);
     }
 }
