@@ -195,7 +195,7 @@ public class SensorManager {
     }
 
     public String getSensorDataString(){
-        String res = "SENSORNAME, SENSORID, SENSORACCURACY, TIMESTAMP, ACCURACY, VALUES";
+        String res = "SENSORNAME, SENSORID, SENSORACCURACY, TIMESTAMP, ACCURACY, VALUES\n";
         sensorDataLock = true;
         for (Sensor s:this.sensors){
             res += s.toString();

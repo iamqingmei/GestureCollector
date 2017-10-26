@@ -198,7 +198,6 @@ public class ExportActivity extends AppCompatActivity {
             });
 
             // Write the string to the file
-            fos.write("DeviceID,TimeStamp,X,Y,Z,Accuracy,DataSource,SensorID\n".getBytes());
             fos.write(res.getBytes());
             if (fos!=null){
                 fos.close();
