@@ -104,10 +104,18 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             }
         });
 
-        findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
+        final Button btn_send = findViewById(R.id.btn_send);
+        btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                send_to_mobile = true;
+                if (!send_to_mobile){
+                    send_to_mobile = true;
+                    btn_send.setText("STOP SEND");
+                }
+                else{
+                    send_to_mobile = false;
+                    btn_send.setText("SEND");
+                }
             }
         });
 
