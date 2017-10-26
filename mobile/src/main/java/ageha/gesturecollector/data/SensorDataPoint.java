@@ -31,6 +31,15 @@ public class SensorDataPoint {
     }
 
     public String toString(){
-        return (timestamp.toString() + ", " + accuracy + ", " + Arrays.toString(values));
+        String temp = "";
+        for (int i = 0; i < 5; i++) {
+            if (i < values.length) {
+                temp += ", " +String.valueOf(values[i]);
+
+            } else {
+                temp += ", ";
+            }
+        }
+        return (timestamp.toString() + ", " + accuracy + temp);
     }
 }
