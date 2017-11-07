@@ -526,7 +526,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Integer.parseInt(test_weight.getText().toString()));
         String tex = "Action: \n" + tag;
         empty_state.setText(tex);
-//        registerTagUserInfo(gender);
     }
 
     @Override
@@ -536,32 +535,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String temp = "Watch Connection: " + mSensorManager.getConnectionState();
         connection_state.setText(temp);
     }
-
-//    private class SendActivityPhoneMessage extends Thread {
-//        String path;
-//        String message;
-//
-//        // Constructor to send a message to the data layer
-//        SendActivityPhoneMessage(String p, String msg) {
-//            Log.i("SendActivityPhoneMsg", "inited");
-//            path = p;
-//            message = msg;
-//        }
-//
-//        public void run() {
-//            NodeApi.GetLocalNodeResult nodes = Wearable.NodeApi.getLocalNode(mGoogleApiClient).await();
-//            Node node = nodes.getNode();
-//            Log.v("SendActivityPhoneMsg", "Activity Node is : "+node.getId()+ " - " + node.getDisplayName());
-//            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
-//            if (result.getStatus().isSuccess()) {
-//                Log.v("SendActivityPhoneMsg", "Activity Message: {" + message + "} sent to: " + node.getDisplayName());
-//            }
-//            else {
-//                // Log an error
-//                Log.v("SendActivityPhoneMsg", "ERROR: failed to send Activity Message");
-//            }
-//        }
-//    }
 
     private class MakeBeepSound extends Thread{
         private ToneGenerator beep;
@@ -611,15 +584,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             DataMapItem.fromDataItem(dataItem).getDataMap()
                     );
                 }
-
-                if (path.startsWith("/sensors/sensorpacks")){
-                    Log.i(TAG, "sensor pack received");
-                    unpackSensorPackData(DataMapItem.fromDataItem(dataItem).getDataMap());
-                }
-
-                if (path.startsWith("/sensors/sensorcount")){
-                    Log.i(TAG, "sensor count received");
-                    Log.i(TAG, "count" + DataMapItem.fromDataItem(dataItem).getDataMap().getInt(DataMapKeys.SENSORCOUNT));
+                if (path.startsWith("sensors/tag")){
+                    Log.i(TAG, "received tags from wear");
+                    DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                    tagging(dataMap.getString(DataMapKeys.TAG));
                 }
 
 

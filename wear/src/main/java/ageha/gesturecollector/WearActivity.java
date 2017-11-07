@@ -131,21 +131,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     try {
                         if(fos!=null)
                             fos.close();
-
-//                        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/filename");
-//                        putDataMapReq.getDataMap().putString("filename", FILENAME);
-//                        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-//                        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
-//                        Asset asset = createAssetFromFile(file_path);
-//                        PutDataMapRequest dataMap = PutDataMapRequest.create("/file");
-//                        dataMap.getDataMap().putAsset("fileasset", asset);
-//                        PutDataRequest request = dataMap.asPutDataRequest();
-//                        Wearable.DataApi.putDataItem(mGoogleApiClient, request);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                 }else{
+                    client.sendTag("wear_start");
+
                     isRecording = true;
                     String stop_tex = "STOP";
                     btn_record.setText(stop_tex);
@@ -230,12 +222,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         if (send_to_mobile){
             client.sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
         }
-//        lastSendTime = System.currentTimeMillis();
-//        client.sendSensorDataPack(sensorEventBuffer);
-//        sensorEventBuffer = "";
-//         client.sendCount();
-//        sendCount();
-//        sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
     }
 
 
@@ -264,21 +250,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         }
     }
 
-    public String sensorEventToString(String name, long time, int type, float[] values, int acc){
-//        "SENSORNAME, SENSORID, TIMESTAMP, ACCURACY, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5\n";
-        String temp = name + ',' + String.valueOf(type) + ',' + String.valueOf(time) + ", " + String.valueOf(acc);
-        for (int i = 0; i < 5; i++){
-            if (i<values.length){
-                temp = temp + ", " + String.valueOf(values[i]);
-
-            } else {
-                temp = temp + ", ";
-            }
-
-        }
-        temp += '\n';
-        return temp;
-    }
 
     public File getDocStorageDir(Context context, String albumName) {
         File file = new File(context.getExternalFilesDir(
@@ -333,26 +304,5 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     public void onDestroy(){
         super.onDestroy();
 //        stopService(new Intent(this, SensorService.class));
-    }
-
-
-    private void sendCount(){
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/sensorcount");
-        Log.i(TAG, "run() " + send_count);
-        dataMap.getDataMap().putInt(DataMapKeys.SENSORCOUNT, send_count);
-        send_count += 1;
-        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
-    }
-
-    private void sendSensorData(String sensorName, int sensorType, int accuracy, long timestamp, float[] values) {
-        Log.i(TAG, "sendSensorData");
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/datapoint/" + sensorType);
-        dataMap.getDataMap().putString(DataMapKeys.SENSORNAME, sensorName);
-        dataMap.getDataMap().putInt(DataMapKeys.ACCURACY, accuracy);
-        dataMap.getDataMap().putLong(DataMapKeys.TIMESTAMP, timestamp);
-        dataMap.getDataMap().putFloatArray(DataMapKeys.VALUES, values);
-        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
     }
 }
