@@ -124,6 +124,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             @Override
             public void onClick(View v) {
                 if(isRecording){
+                    client.sendTag("wear_stop");
                     isRecording = false;
                     String start_tex = "START";
                     btn_record.setText(start_tex);
