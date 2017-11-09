@@ -10,6 +10,7 @@ import ageha.gesturecollector.event.*;
 
 public class TagManager {
     private static final String TAG = "TagManager";
+    private boolean is_recording = false;
 //    private static final int CLIENT_CONNECTION_TIMEOUT = 15000;
 
     private static TagManager instance;
@@ -38,9 +39,20 @@ public class TagManager {
         this.tags = new LinkedList<>();
     }
 
-    synchronized void addTag(String pTagName, String name, int age, int height, String gender, int weight) {
-        TagData tag = new TagData(pTagName, new Timestamp(System.currentTimeMillis()), name, age, height, gender, weight);
+    synchronized void addTag(String pTagName, String name, int age, int height, String gender, int weight, char leftOrRight) {
+        if (pTagName.equals("wear_start")){
+            this.is_recording = true;
+        }
+        if (pTagName.equals("wear_stop")){
+            this.is_recording = false;
+        }
+
+        if (!is_recording){
+            return;
+        }
+        TagData tag = new TagData(pTagName, new Timestamp(System.currentTimeMillis()), name, age, height, gender, weight, leftOrRight);
         this.tags.add(tag);
+
 
         BusProvider.postOnMainThread(new TagAddedEvent(tag));
     }

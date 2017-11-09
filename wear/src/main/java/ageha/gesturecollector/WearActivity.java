@@ -9,8 +9,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEvent;
-import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -27,13 +25,10 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 //import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
 //import com.google.android.gms.wearable.PutDataMapRequest;
 //import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
@@ -45,8 +40,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import ageha.shared.DataMapKeys;
 
 
 public class WearActivity extends WearableActivity implements SensorEventListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -66,7 +59,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private FileOutputStream fos = null;
     private StringBuilder sb = new StringBuilder("");
 
-    private int send_count = 0;
+    private int beep_count = 0;
     private long sensorTimeReference = 0L;
     private long myTimeReference = 0L;
     private DeviceClient client;
@@ -109,13 +102,15 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                String tex = "STOP SEND";
                 if (!send_to_mobile){
                     send_to_mobile = true;
-                    btn_send.setText("STOP SEND");
+                    btn_send.setText(tex);
                 }
                 else{
+                    tex = "SEND";
                     send_to_mobile = false;
-                    btn_send.setText("SEND");
+                    btn_send.setText(tex);
                 }
             }
         });
@@ -146,7 +141,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     cb_write_to_file.setEnabled(false);
                     if(WRITE_TO_FILE) {
                         FILENAME = "SENSORDATA" + System.currentTimeMillis()+".txt";
-                        file_path = getDocStorageDir(getBaseContext(),"DATA").getAbsolutePath()+"/"+FILENAME;
+                        file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+FILENAME;
                         Log.i(TAG, "file path" + file_path);
                         try {
                             fos = new FileOutputStream(new File(file_path));
@@ -167,6 +162,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
 //        Register Sensors
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        assert sensorManager != null;
         List<Sensor> list = sensorManager.getSensorList(Sensor.TYPE_ALL);
         if (list.size() < 1) {
             Log.e(TAG, "No sensors returned from getSensorList");
@@ -183,12 +179,15 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 sensorManager.registerListener(this, sensorArray[i], sampling_rate);
 
             }
-            textView.setText("Found " + sensorArray.length + " sensors");
+            String temp = "Found " + sensorArray.length + " sensors";
+            textView.setText(temp);
         }
     }
 //
     public void onBeep(View view){
+        beep_count ++;
         Log.w("WearActivity", "onBeep");
+        client.sendTag("beep" + beep_count);
     }
 
 //    @Override
@@ -228,22 +227,23 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     public void WriteSensorEvent(long time, int type, float[] values){
         try {
-            String temp = String.valueOf(time) + ", " + String.valueOf(type);
+            StringBuilder temp = new StringBuilder(String.valueOf(time) + ", " + String.valueOf(type));
             for (int i = 0; i < 5; i++){
                 if (i<values.length){
-                    temp = temp + ", " + String.valueOf(values[i]);
+                    temp.append(", ").append(String.valueOf(values[i]));
 
                 } else {
-                    temp = temp + ", ";
+                    temp.append(", ");
                 }
 
             }
-            temp += '\n';
-            fos.write(temp.getBytes());
+            temp.append('\n');
+            fos.write(temp.toString().getBytes());
             write_count += 1;
             if (write_count % 10000 == 0){
                 Log.i(TAG, "write count: " + write_count);
-                textView.setText("write count: " + write_count);
+                String write_temp = "write count: " + write_count;
+                textView.setText(write_temp);
             }
         } catch (IOException e) {
             Log.e(TAG, "here");
@@ -252,9 +252,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     }
 
 
-    public File getDocStorageDir(Context context, String albumName) {
+    public File getDocStorageDir(Context context) {
         File file = new File(context.getExternalFilesDir(
-                Environment.DIRECTORY_DOCUMENTS), albumName);
+                Environment.DIRECTORY_DOCUMENTS), "DATA");
         if (!file.mkdirs()) {
             Log.e(TAG, "Directory not created");
         }

@@ -83,23 +83,6 @@
                     android:hint="Weight in KG"
                     android:inputType="number" />
 
-                <Button
-                    android:id="@+id/button_refresh"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="70dp"
-                    android:text="REFRESH" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFcccccc"
-                android:elevation="0dp"
-                android:orientation="horizontal"
-                android:padding="0dp"
-                android:gravity="center">
 
                 <EditText
                     android:id="@+id/text_input_age"
@@ -113,15 +96,28 @@
                     android:hint="@string/height_hint"
                     android:layout_width="wrap_content"
                     android:inputType="number"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFcccccc"
+                android:elevation="0dp"
+                android:orientation="horizontal"
+                android:padding="0dp"
+                android:gravity="center">
+
+
                 <RadioGroup
                     android:id="@+id/radioGrpGender"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     >
                     <RadioButton
                         android:id="@+id/radioM"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:checked="true"
@@ -131,7 +127,7 @@
                         />
                     <RadioButton
                         android:id="@+id/radioF"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:checked="false"
@@ -140,6 +136,40 @@
                         android:text="@string/female_name"
                         />
                 </RadioGroup>
+                <RadioGroup
+                    android:id="@+id/radioGrpHand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                    <RadioButton
+                        android:id="@+id/radioLeft"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:checked="true"
+                        android:layout_weight="1"
+                        android:textSize="14sp"
+                        android:text="Right"
+                        />
+                    <RadioButton
+                        android:id="@+id/radioRight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:checked="false"
+                        android:layout_weight="1"
+                        android:textSize="14sp"
+                        android:text="Left"
+                        />
+                </RadioGroup>
+
+                <Button
+                    android:id="@+id/button_refresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="REFRESH" />
             </LinearLayout>
 
 

@@ -344,7 +344,7 @@ public class ExportActivity extends AppCompatActivity {
 
             int i = 0;
 //            fos.write(TagManager.getInstance(this).getUserInfo().getBytes());
-            fos.write(("TagName,TimeStamp,Tester_Name,Tester_Age,Tester_Height, Tester_Gender, Tester_Weight\n").getBytes());
+            fos.write(("TagName,TimeStamp,Tester_Name,Tester_Age,Tester_Height, Tester_Gender, Tester_Weight, Tester_hand\n").getBytes());
             for (TagData tag : TagManager.getInstance(this).getTags()) {
                 final int progress = i;
                 runOnUiThread(new Runnable() {
@@ -355,11 +355,13 @@ public class ExportActivity extends AppCompatActivity {
                 });
                 ++i;
                 fos.write((tag.getTagName() + ", " +
-                    tag.getTimestamp() + ", " +
-                    tag.getName()+ ", " +
-                    String.valueOf(tag.getAge())+ ", " +
-                    String.valueOf(tag.getHeight())+ ", " +
-                    tag.getGender() + ", " +String.valueOf(tag.getWeight()) + "\n").getBytes());
+                        tag.getTimestamp() + ", " +
+                        tag.getName()+ ", " +
+                        String.valueOf(tag.getAge())+ ", " +
+                        String.valueOf(tag.getHeight())+ ", " +
+                        tag.getGender() + ", " +
+                        String.valueOf(tag.getWeight()) + "," +
+                        String.valueOf(tag.getLeftright()) + "\n").getBytes());
             }
             // Close
             if(fos!=null)

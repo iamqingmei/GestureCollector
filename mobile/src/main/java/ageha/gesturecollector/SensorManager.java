@@ -39,8 +39,6 @@ public class SensorManager {
     private boolean sensorDataLock = false;
     private SparseArray<Sensor> sensorMapping;
     private ArrayList<Sensor> sensors;
-    private String sensorDataPack = "";
-//    private SensorNames sensorNames;
 
     public static synchronized SensorManager getInstance(Context context) {
         if (instance == null) {
@@ -164,9 +162,6 @@ public class SensorManager {
         });
     }
 
-//    void getNodes(ResultCallback<NodeApi.GetConnectedNodesResult> pCallback) {
-//        Wearable.NodeApi.getConnectedNodes(googleApiClient).setResultCallback(pCallback);
-//    }
 
     private void controlMeasurementInBackground(final String path) {
         if (validateConnection()) {
@@ -188,6 +183,7 @@ public class SensorManager {
         } else {
             Log.w(TAG, "No connection possible");
         }
+
     }
 
     public void DeleteAllSensors(){
@@ -201,23 +197,7 @@ public class SensorManager {
         for (Sensor s:this.sensors){
             res += s.toString();
         }
-        res += getSensorDataPack();
         sensorDataLock = false;
         return res;
-    }
-
-
-    boolean getConnectionState(){
-        return sensors.size() != 0;
-    }
-
-    public void addSensorDataPack(String sensorDataPack){
-        // TODO parse the sensor data pack
-//        Log.w(TAG, sensorDataPack);
-        this.sensorDataPack += sensorDataPack;
-    }
-
-    public String getSensorDataPack(){
-        return this.sensorDataPack;
     }
 }

@@ -1,4 +1,5 @@
 package ageha.gesturecollector;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -25,14 +26,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.sql.Timestamp;
@@ -60,10 +62,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText test_age;
     private EditText test_height;
     private RadioGroup test_genger;
+    private RadioGroup test_hand;
     private EditText test_weight;
     private TextView connection_state;
     private TextView data_state;
     private TimeStart timer;
+    private ConnectionState connection_checker;
     private MakeBeepSound beep;
 
     GoogleApiClient mGoogleApiClient;
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_age = findViewById(R.id.text_input_age);
         this.test_height = findViewById(R.id.text_input_height);
         this.test_genger = findViewById(R.id.radioGrpGender);
+        this.test_hand = findViewById(R.id.radioGrpHand);
         this.test_weight = findViewById(R.id.text_input_weight);
         this.connection_state = findViewById(R.id.connection_state);
         this.data_state = findViewById(R.id.data_state);
@@ -87,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
         timer = new TimeStart();
+        connection_checker = new ConnectionState();
         beep = new MakeBeepSound(100, 150);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -99,8 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViewById(R.id.button_refresh).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                String temp = "Watch Connection: " + mSensorManager.getConnectionState();
-                connection_state.setText(temp);
+                connection_checker.run();
                 data_state.setText(getDataInfo());
             }
         });
@@ -317,8 +322,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (sensors.size() > 0){
             mSensorManager.startMeasurement();
         }
-        String temp = "Watch Connection: " + mSensorManager.getConnectionState();
-        connection_state.setText(temp);
+        connection_checker.run();
         data_state.setText(getDataInfo());
     }
 
@@ -370,33 +374,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onConnected(Bundle bundle) {
-        util.warning_msg(getApplicationContext(), "Connected!");
         Wearable.DataApi.addListener(mGoogleApiClient, this);
     }
-
-//    public void sendNotification(View view) {
-//        Log.i("MainActivity", "sendNotification");
-//        TextView editText = findViewById(R.id.editText);
-//        if (editText.length() > 0) {
-//            editText.setText(null);
-//        }
-//        String toSend = editText.getText().toString();
-//        if(toSend.isEmpty())
-//            toSend = "You sent an empty notification";
-//
-//        Notification notification = new NotificationCompat.Builder(getApplication())
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setContentTitle("Gesture Collector")
-//                .setContentText(toSend)
-//                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
-//                .build();
-//
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
-//        int notificationId = 1;
-//        notificationManager.notify(notificationId, notification);
-//
-////        new SendActivityPhoneMessage("/testing_path", "hii").run();
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -494,6 +473,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Set up touch listener for non-text box views to hide keyboard.
         if (!(view instanceof EditText)) {
             view.setOnTouchListener(new View.OnTouchListener() {
+                @SuppressLint("ClickableViewAccessibility")
                 public boolean onTouch(View v, MotionEvent event) {
                     util.hideSoftKeyboard(MainActivity.this);
                     return false;
@@ -511,19 +491,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void tagging(String tag){
+        if (tag.startsWith("beep")){
+            util.warning_msg(getApplicationContext(), "Beep");
+            return;
+        }
         String gender;
-        if (test_genger.getCheckedRadioButtonId() == ageha.gesturecollector.R.id.radioF){
+        char hand;
+        if (test_genger.getCheckedRadioButtonId() == R.id.radioF){
             gender = "F";
         }else{
             gender = "M";
         }
+        if (test_hand.getCheckedRadioButtonId() == R.id.radioLeft){
+            hand = 'l';
+        }else{
+            hand = 'r';
+        }
+
         TagManager.getInstance(MainActivity.this).
                 addTag(tag,
                         tester_name.getText().toString(),
                         Integer.parseInt(test_age.getText().toString()),
                         Integer.parseInt(test_height.getText().toString()),
                         gender,
-                        Integer.parseInt(test_weight.getText().toString()));
+                        Integer.parseInt(test_weight.getText().toString()),
+                        hand);
         String tex = "Action: \n" + tag;
         empty_state.setText(tex);
     }
@@ -532,8 +524,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
         Log.v("MainActivity", "onStart called");
-        String temp = "Watch Connection: " + mSensorManager.getConnectionState();
-        connection_state.setText(temp);
+        connection_checker.run();
     }
 
     private class MakeBeepSound extends Thread{
@@ -556,7 +547,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String getDataInfo(){
         ArrayList<Sensor> sensors = mSensorManager.getSensors();
-        int sensorPackSize = mSensorManager.getSensorDataPack().length();
         int DataPointSize = 0;
         for (Sensor sensor: sensors){
             DataPointSize += sensor.getDataPoints().size();
@@ -564,7 +554,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String data_size = String.valueOf(DataPointSize);
         String tag_size = String.valueOf(TagManager.getInstance(MainActivity.this).getTags().size());
 
-        return "Data Points: " + data_size + " Tags: " + tag_size + " Pack: " + sensorPackSize;
+        return "Data Points: " + data_size + " Tags: " + tag_size;
     }
 
     @Override
@@ -577,20 +567,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 DataItem dataItem = dataEvent.getDataItem();
                 Uri uri = dataItem.getUri();
                 String path = uri.getPath();
-                Log.i(TAG, uri.getPath());
+//                Log.i(TAG, uri.getPath());
                 if (path.startsWith("/sensors/datapoint")) {
                     unpackSensorData(
                             Integer.parseInt(uri.getLastPathSegment()),
                             DataMapItem.fromDataItem(dataItem).getDataMap()
                     );
                 }
-                if (path.startsWith("sensors/tag")){
+                if (path.startsWith("/sensors/tag")){
                     Log.i(TAG, "received tags from wear");
                     DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
                     tagging(dataMap.getString(DataMapKeys.TAG));
                 }
-
-
 
             }
         }
@@ -607,8 +595,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mSensorManager.addSensorData(sensorName, sensorType, accuracy, timestamp, values);
     }
-    //
-    private void unpackSensorPackData(DataMap dataMap) {
-        mSensorManager.addSensorDataPack(dataMap.getString(DataMapKeys.SENSORPACK));
+
+
+
+    private class ConnectionState extends Thread{
+        public void run(){
+            getNodes();
+        }
+        private void getNodes() {
+
+            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                @Override
+                public void onResult(@NonNull NodeApi.GetConnectedNodesResult nodes) {
+                    StringBuilder results = null;
+                    for (Node node : nodes.getNodes()) {
+                        if (results == null){
+                            results = new StringBuilder();
+                        }
+                        results.append(node.getDisplayName()).append(" ");
+
+                    }
+                    String temp =  "connected to : " + results.toString();
+                    connection_state.setText(temp);
+                }
+            });
+        }
     }
+
 }
