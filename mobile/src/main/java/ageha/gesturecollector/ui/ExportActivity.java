@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import ageha.gesturecollector.MainActivity;
 import ageha.gesturecollector.TagManager;
 import ageha.gesturecollector.SensorManager;
 import ageha.gesturecollector.data.Sensor;
@@ -152,15 +153,21 @@ public class ExportActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private String getDataInfo(){
-        ArrayList<Sensor> sensors = SensorManager.getInstance(ExportActivity.this).getSensors();
-        int DataPointSize = 0;
-        for (Sensor sensor: sensors){
-            DataPointSize += sensor.getDataPoints().size();
-        }
-        String data_size = String.valueOf(DataPointSize);
-        String tag_size = String.valueOf(TagManager.getInstance(ExportActivity.this).getTags().size());
+//    private String getDataInfo(){
+//        ArrayList<Sensor> sensors = SensorManager.getInstance(ExportActivity.this).getSensors();
+//        int DataPointSize = 0;
+//        for (Sensor sensor: sensors){
+//            DataPointSize += sensor.getDataPoints().size();
+//        }
+//        String data_size = String.valueOf(DataPointSize);
+//        String tag_size = String.valueOf(TagManager.getInstance(ExportActivity.this).getTags().size());
+//
+//        return "Data Points: " + data_size + " Tags: " + tag_size;
+//    }
 
+    private String getDataInfo(){
+        String data_size = String.valueOf(SensorManager.getInstance(ExportActivity.this).getDataPointSize());
+        String tag_size = String.valueOf(TagManager.getInstance(ExportActivity.this).getTags().size());
         return "Data Points: " + data_size + " Tags: " + tag_size;
     }
 

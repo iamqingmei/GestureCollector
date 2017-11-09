@@ -2,8 +2,6 @@ package ageha.gesturecollector;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
@@ -19,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -39,9 +38,7 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.List;
 
-import ageha.gesturecollector.data.Sensor;
 import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
 import ageha.shared.DataMapKeys;
@@ -56,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar mToolbar;
 
     private SensorManager mSensorManager;
+    private TagManager mTagManager;
     private TextView status;
     private TextView empty_state;
     private EditText tester_name;
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView data_state;
     private TimeStart timer;
     private ConnectionState connection_checker;
-    private MakeBeepSound beep;
+//    private MakeBeepSound beep;
 
     GoogleApiClient mGoogleApiClient;
     @Override
@@ -88,12 +86,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.test_weight = findViewById(R.id.text_input_weight);
         this.connection_state = findViewById(R.id.connection_state);
         this.data_state = findViewById(R.id.data_state);
-
+        this.mTagManager = TagManager.getInstance(MainActivity.this);
+        this.mSensorManager = SensorManager.getInstance(this);
         NavigationView mNavigationView = findViewById(R.id.navView);
         mNavigationView.setNavigationItemSelectedListener(this);
         timer = new TimeStart();
         connection_checker = new ConnectionState();
-        beep = new MakeBeepSound(100, 150);
+//        beep = new MakeBeepSound(100, 150);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -110,216 +109,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        findViewById(ageha.gesturecollector.R.id.tag0_button).setOnClickListener(new View.OnClickListener() {
+        ArrayList<Integer> tagButtonIDs = new ArrayList<>();
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag0_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag1_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag2_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag3_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag4_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag5_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag6_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag7_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag8_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag9_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag_start2_button);
+        tagButtonIDs.add(ageha.gesturecollector.R.id.tag_start1_button);
+
+        for (Integer btnId : tagButtonIDs){
+            final Button cur_btn = findViewById(btnId);
+            cur_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean check_red = check_tester_info_input(getApplicationContext());
+                    if (!check_red){
+                        util.warning_msg(getApplicationContext());
+                    }
+                    else if (!mTagManager.if_recording()){
+                        util.warning_msg(getApplicationContext(), "Watch has not started recording!");
+                    }
+                    else{
+                        tagging(cur_btn.getText().toString());
+                        String tex = "Action: \n" + cur_btn.getText().toString();
+                        empty_state.setText(tex);
+                        timer.run();
+                    }
+
+                }
+            });
+        }
+
+        findViewById(R.id.btn_action_finish).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("0");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag1_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("1");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag2_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("2");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag3_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("3");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag4_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("4");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag5_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("5");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag6_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("6");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag7_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("7");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag8_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("8");
-                    timer.run();
-                }
-
-            }
-        });
-
-
-        findViewById(ageha.gesturecollector.R.id.tag9_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("9");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag_start2_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("start2");
-                    timer.run();
-                }
-
-            }
-        });
-
-        findViewById(ageha.gesturecollector.R.id.tag_start1_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean check_red = check_tester_info_input(getApplicationContext());
-                if (!check_red){
-                    util.warning_msg(getApplicationContext());
-                }
-                else{
-                    tagging("start1");
-                    timer.run();
-                }
-
+                tagging("ACTION_FINISH");
             }
         });
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-//        this.mHandler = new Handler();
-//        this.mHandler.postDelayed(m_Runnable, 2000);
-//        startService(new Intent(this, SensorReceiverService.class));
-        mSensorManager = SensorManager.getInstance(this);
     }
 
 
-//    private final Runnable m_Runnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            if (wearManager.getWearName() != null){
-//                TextView empty_state = (TextView) findViewById(R.id.empty_state);
-//                empty_state.setText(wearManager.getWearName());
-//            }
-//            mHandler.postDelayed(m_Runnable, 2000);
-//        }
-//    };
     @Override
     protected void onResume(){
         super.onResume();
         mGoogleApiClient.connect();
         Wearable.DataApi.addListener(mGoogleApiClient, this);
         BusProvider.getInstance().register(this);
-        List<Sensor> sensors = SensorManager.getInstance(this).getSensors();
-        util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensors.size());
+        int sensor_number =  mSensorManager.getSensorNumber();
+        util.warning_msg(getApplicationContext(), "Number of Sensors: " + sensor_number);
 
-        if (sensors.size() > 0){
+        if (sensor_number > 0){
             mSensorManager.startMeasurement();
         }
         connection_checker.run();
@@ -399,13 +247,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String text;
                     if ((millisUntilFinish / 1000) == action_time){
                         text = "Start!";
-                        beep.run();
+//                        beep.run();
                     }
                     else if ((millisUntilFinish / 1000) >= action_time){
                         text = "Counting Down: " + String.valueOf((millisUntilFinish - action_time * 1000)/1000);
                     }else{
                         text = "Recording Data: " + String.valueOf(millisUntilFinish /1000);
-                        beep.run();
+//                        beep.run();
 
                     }
                     status.setText(text);
@@ -508,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             hand = 'r';
         }
 
-        TagManager.getInstance(MainActivity.this).
+        mTagManager.
                 addTag(tag,
                         tester_name.getText().toString(),
                         Integer.parseInt(test_age.getText().toString()),
@@ -516,8 +364,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         gender,
                         Integer.parseInt(test_weight.getText().toString()),
                         hand);
-        String tex = "Action: \n" + tag;
-        empty_state.setText(tex);
     }
 
     @Override
@@ -527,33 +373,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         connection_checker.run();
     }
 
-    private class MakeBeepSound extends Thread{
-        private ToneGenerator beep;
-        int dur;
-
-        MakeBeepSound(int duration, int volume){
-            this.dur = duration;
-            this.beep = new ToneGenerator(AudioManager.STREAM_MUSIC, volume); // beep's volume
-        }
-
-        public void run(){
-            this.beep.startTone(ToneGenerator.TONE_CDMA_PIP,this.dur);
-        }
-    }
+//    private class MakeBeepSound extends Thread{
+//        private ToneGenerator beep;
+//        int dur;
+//
+//        MakeBeepSound(int duration, int volume){
+//            this.dur = duration;
+//            this.beep = new ToneGenerator(AudioManager.STREAM_MUSIC, volume); // beep's volume
+//        }
+//
+//        public void run(){
+//            this.beep.startTone(ToneGenerator.TONE_CDMA_PIP,this.dur);
+//        }
+//    }
 
 //    private void registerTagUserInfo(String gender){
 //        TagManager.getInstance(MainActivity.this).addUserInfo("name: " + tester_name.getText().toString() + " age: " + test_age.getText().toString() + " height: " + test_height.getText().toString() + "gender: " + gender + "\n");
 //    }
 
     private String getDataInfo(){
-        ArrayList<Sensor> sensors = mSensorManager.getSensors();
-        int DataPointSize = 0;
-        for (Sensor sensor: sensors){
-            DataPointSize += sensor.getDataPoints().size();
-        }
-        String data_size = String.valueOf(DataPointSize);
+        String data_size = String.valueOf(mSensorManager.getDataPointSize());
         String tag_size = String.valueOf(TagManager.getInstance(MainActivity.this).getTags().size());
-
         return "Data Points: " + data_size + " Tags: " + tag_size;
     }
 
@@ -597,8 +437,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-
-    private class ConnectionState extends Thread{
+//
+    private class ConnectionState {
         public void run(){
             getNodes();
         }
@@ -615,7 +455,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         results.append(node.getDisplayName()).append(" ");
 
                     }
-                    String temp =  "connected to : " + results.toString();
+                    String temp;
+                    if (results == null){
+                        temp =  "connected to : None" ;
+                    }else{
+                        temp =  "connected to : " + results.toString();
+                    }
+
                     connection_state.setText(temp);
                 }
             });

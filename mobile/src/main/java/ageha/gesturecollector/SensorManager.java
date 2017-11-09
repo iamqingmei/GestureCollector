@@ -39,7 +39,6 @@ public class SensorManager {
     private boolean sensorDataLock = false;
     private SparseArray<Sensor> sensorMapping;
     private ArrayList<Sensor> sensors;
-
     public static synchronized SensorManager getInstance(Context context) {
         if (instance == null) {
             instance = new SensorManager(context.getApplicationContext());
@@ -57,10 +56,6 @@ public class SensorManager {
                 .build();
 
         this.executorService = Executors.newCachedThreadPool();
-    }
-
-    public ArrayList<Sensor> getSensors() {
-        return (ArrayList<Sensor>) sensors.clone();
     }
 
 //    Sensor getSensor(String id) {
@@ -192,12 +187,24 @@ public class SensorManager {
     }
 
     public String getSensorDataString(){
-        String res = "SENSORNAME, SENSORID, TIMESTAMP, ACCURACY, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5\n";
+        StringBuilder res = new StringBuilder("SENSORNAME, SENSORID, TIMESTAMP, ACCURACY, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5\n");
         sensorDataLock = true;
         for (Sensor s:this.sensors){
-            res += s.toString();
+            res.append(s.toString());
         }
         sensorDataLock = false;
-        return res;
+        return res.toString();
+    }
+
+    public int getSensorNumber(){
+        return this.sensors.size();
+    }
+
+    public int getDataPointSize(){
+        int DataPointSize = 0;
+        for (Sensor s: this.sensors){
+            DataPointSize += s.getDataPoints().size();
+        }
+        return DataPointSize;
     }
 }

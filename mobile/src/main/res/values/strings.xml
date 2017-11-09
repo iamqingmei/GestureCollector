@@ -33,6 +33,8 @@
 
 
     <string name="about_content">Hi! I am Ageha!</string>
+    <string name="action_idle">Action: \nIDLE</string>
+    <string name="finish_tag">Action Finish</string>
 
 
 </resources>

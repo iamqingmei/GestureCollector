@@ -57,5 +57,9 @@ public class TagManager {
         BusProvider.postOnMainThread(new TagAddedEvent(tag));
     }
 
+    public boolean if_recording(){
+        return is_recording;
+    }
+
 }
 
