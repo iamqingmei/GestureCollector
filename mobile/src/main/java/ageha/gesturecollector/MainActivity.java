@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         tagging(cur_btn.getText().toString());
                         String tex = "Action: \n" + cur_btn.getText().toString();
                         empty_state.setText(tex);
+                        data_state.setText(getDataInfo());
                         timer.run();
                     }
 
