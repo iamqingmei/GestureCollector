@@ -19,7 +19,7 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
+//import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,9 +37,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.util.Arrays;
 //import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class WearActivity extends WearableActivity implements SensorEventListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -139,8 +142,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //                    WRITE_TO_FILE = cb_write_to_file.isChecked();
 //                    cb_write_to_file.setEnabled(false);
 //                    if(WRITE_TO_FILE) {
-                    FILENAME = "SENSORDATA" + System.currentTimeMillis()+".txt";
-                    file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+FILENAME;
+                    String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
+                    String filename = String.format("%s_%s.txt", "SENSORDATA", date);
+                    file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+filename;
                     Log.i(TAG, "file path" + file_path);
                     try {
                         fos = new FileOutputStream(new File(file_path));
