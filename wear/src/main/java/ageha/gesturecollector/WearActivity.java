@@ -49,11 +49,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
     private String FILENAME ="";
     private String file_path;
-    private boolean WRITE_TO_FILE = false;
     private boolean isRecording = false;
-    private boolean send_to_mobile = false;
+//    private boolean send_to_mobile = false;
     private Button btn_record;
-    private CheckBox cb_write_to_file;
 
     private GoogleApiClient mGoogleApiClient;
     private FileOutputStream fos = null;
@@ -81,7 +79,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
         textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
-        cb_write_to_file = findViewById(R.id.cb_write_to_file);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -92,38 +89,39 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         findViewById(R.id.button_quit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                Log.i(TAG, "btn quit onclick");
                 android.os.Process.killProcess(android.os.Process.myPid());
 //                stopService(new Intent(getApplicationContext(), SensorService.class));
                 System.exit(1);
             }
         });
 
-        final Button btn_send = findViewById(R.id.btn_send);
-        btn_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                String tex = "STOP SEND";
-                if (!send_to_mobile){
-                    send_to_mobile = true;
-                    btn_send.setText(tex);
-                }
-                else{
-                    tex = "SEND";
-                    send_to_mobile = false;
-                    btn_send.setText(tex);
-                }
-            }
-        });
+//        btn_send.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View arg0) {
+//                String tex = "STOP SEND";
+//                if (!send_to_mobile){
+//                    send_to_mobile = true;
+//                    btn_send.setText(tex);
+//                }
+//                else{
+//                    tex = "SEND";
+//                    send_to_mobile = false;
+//                    btn_send.setText(tex);
+//                }
+//            }
+//        });
 
         btn_record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(isRecording){
+                    Log.i(TAG, "btn stop onclick");
                     client.sendTag("wear_stop");
                     isRecording = false;
                     String start_tex = "START";
                     btn_record.setText(start_tex);
-                    cb_write_to_file.setEnabled(true);
+//                    cb_write_to_file.setEnabled(true);
                     try {
                         if(fos!=null)
                             fos.close();
@@ -132,29 +130,29 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     }
 
                 }else{
+                    Log.i(TAG, "btn Start onclick");
                     client.sendTag("wear_start");
 
                     isRecording = true;
                     String stop_tex = "STOP";
                     btn_record.setText(stop_tex);
-                    WRITE_TO_FILE = cb_write_to_file.isChecked();
-                    cb_write_to_file.setEnabled(false);
-                    if(WRITE_TO_FILE) {
-                        FILENAME = "SENSORDATA" + System.currentTimeMillis()+".txt";
-                        file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+FILENAME;
-                        Log.i(TAG, "file path" + file_path);
-                        try {
-                            fos = new FileOutputStream(new File(file_path));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try{
-                            fos.write(sb.toString().getBytes());
-                            fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
-                        } catch (IOException e) {
-                            Log.e(TAG, "here");
-                            e.printStackTrace();
-                        }
+//                    WRITE_TO_FILE = cb_write_to_file.isChecked();
+//                    cb_write_to_file.setEnabled(false);
+//                    if(WRITE_TO_FILE) {
+                    FILENAME = "SENSORDATA" + System.currentTimeMillis()+".txt";
+                    file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+FILENAME;
+                    Log.i(TAG, "file path" + file_path);
+                    try {
+                        fos = new FileOutputStream(new File(file_path));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try{
+                        fos.write(sb.toString().getBytes());
+                        fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
+                    } catch (IOException e) {
+                        Log.e(TAG, "here");
+                        e.printStackTrace();
                     }
                 }
             }
@@ -190,10 +188,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         client.sendTag("beep" + beep_count);
     }
 
-//    @Override
-//    public void onSensorChanged(SensorEvent sensorEvent) {
-//        return;
-//    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         // calculate timestamp
@@ -210,7 +204,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             return;
         }
 
-        if(WRITE_TO_FILE && isRecording){
+        if(isRecording){
             WriteSensorEvent(time,event.sensor.getType(), event.values);
         }
 
@@ -219,9 +213,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        if (System.currentTimeMillis() - lastSendTime < 1000){
 //            return;
 //        }
-        if (send_to_mobile){
-            client.sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
-        }
+//        if (send_to_mobile){
+//            client.sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
+//        }
     }
 
 
