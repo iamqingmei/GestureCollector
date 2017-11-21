@@ -46,20 +46,11 @@ public class TagManager {
         if (pTagName.equals("wear_stop")){
             this.is_recording = false;
         }
-
-        if (!is_recording){
-            return;
-        }
         TagData tag = new TagData(pTagName, new Timestamp(System.currentTimeMillis()), name, age, height, gender, weight, leftOrRight);
         this.tags.add(tag);
 
 
         BusProvider.postOnMainThread(new TagAddedEvent(tag));
     }
-
-    public boolean if_recording(){
-        return is_recording;
-    }
-
 }
 

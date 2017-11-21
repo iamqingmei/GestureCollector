@@ -67,6 +67,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
     private int write_count = 0;
     private TextView textView;
+    private String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
+    private String filename = String.format("%s_%s.txt", "SENSORDATA", date);
 //    private String sensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +98,24 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 android.os.Process.killProcess(android.os.Process.myPid());
 //                stopService(new Intent(getApplicationContext(), SensorService.class));
                 System.exit(1);
+            }
+        });
+
+        findViewById(R.id.btn_time_calibration).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                Log.i(TAG, "btn btn_time_calibration onclick");
+                try {
+                    StringBuilder temp = new StringBuilder(String.valueOf(System.currentTimeMillis()) + ", " + String.valueOf(-1));
+                    for (int i = 0; i < 5; i++){
+                        temp.append(", ");
+                    }
+                    temp.append('\n');
+                    fos.write(temp.toString().getBytes());
+                } catch (IOException e) {
+                    Log.e(TAG, "btn btn_time_calibration error");
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -139,25 +159,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     isRecording = true;
                     String stop_tex = "STOP";
                     btn_record.setText(stop_tex);
-//                    WRITE_TO_FILE = cb_write_to_file.isChecked();
-//                    cb_write_to_file.setEnabled(false);
-//                    if(WRITE_TO_FILE) {
-                    String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
-                    String filename = String.format("%s_%s.txt", "SENSORDATA", date);
-                    file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+filename;
-                    Log.i(TAG, "file path" + file_path);
-                    try {
-                        fos = new FileOutputStream(new File(file_path));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try{
-                        fos.write(sb.toString().getBytes());
-                        fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
-                    } catch (IOException e) {
-                        Log.e(TAG, "here");
-                        e.printStackTrace();
-                    }
+
                 }
             }
         });
@@ -183,6 +185,21 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             }
             String temp = "Found " + sensorArray.length + " sensors";
             textView.setText(temp);
+        }
+        // Create file
+        file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+filename;
+        Log.i(TAG, "file path" + file_path);
+        try {
+            fos = new FileOutputStream(new File(file_path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try{
+            fos.write(sb.toString().getBytes());
+            fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
+        } catch (IOException e) {
+            Log.e(TAG, "here");
+            e.printStackTrace();
         }
     }
 //

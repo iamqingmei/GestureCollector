@@ -43,7 +43,7 @@ import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
 import ageha.shared.DataMapKeys;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AmbientMode.AmbientCallbackProvider {
 
 
     static final private int count_down_time = 4;
@@ -132,9 +132,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (!check_red){
                         util.warning_msg(getApplicationContext());
                     }
-                    else if (!mTagManager.if_recording()){
-                        util.warning_msg(getApplicationContext(), "Watch has not started recording!");
-                    }
+//                    else if (!mTagManager.if_recording()){
+//                        util.warning_msg(getApplicationContext(), "Watch has not started recording!");
+//                    }
                     else{
                         tagging(cur_btn.getText().toString());
                         String tex = "Action: \n" + cur_btn.getText().toString();
@@ -151,6 +151,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 tagging("ACTION_FINISH");
+            }
+        });
+
+        findViewById(R.id.btn_time_calibration).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tagging("TIME_CALIBRATION");
             }
         });
 
@@ -344,6 +351,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             util.warning_msg(getApplicationContext(), "Beep");
             return;
         }
+
+        if (tag.equals("wear_start")){
+            findViewById(R.id.linearLayout_bottom_tags).setVisibility(View.VISIBLE);
+            findViewById(R.id.linearLayout_top_tags).setVisibility(View.VISIBLE);
+            findViewById(R.id.linearLayout_time).setVisibility(View.GONE);
+        }
+        if (tag.equals("wear_stop")){
+            findViewById(R.id.linearLayout_bottom_tags).setVisibility(View.GONE);
+            findViewById(R.id.linearLayout_top_tags).setVisibility(View.GONE);
+            findViewById(R.id.linearLayout_time).setVisibility(View.VISIBLE);
+        }
+
         String gender;
         char hand;
         if (test_genger.getCheckedRadioButtonId() == R.id.radioF){

@@ -31,7 +31,7 @@
             android:orientation="horizontal">
             <Button
                 android:layout_width="wrap_content"
-                android:layout_height="37dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="START"
@@ -46,6 +46,8 @@
 
 
 
+
+
         <TextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
@@ -57,6 +59,24 @@
             <!--android:layout_height="wrap_content"-->
             <!--android:text="Write to file"-->
             <!--android:id="@+id/cb_write_to_file" />-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Time cali"
+                android:id="@+id/btn_time_calibration"/>
+            <!--<Button-->
+            <!--android:layout_width="70dp"-->
+            <!--android:layout_height="37dp"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:text="SEND"-->
+            <!--android:id="@+id/btn_send"/>-->
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>
