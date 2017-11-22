@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 //import android.support.v4.app.ActivityCompat;
 //import android.support.v4.content.ContextCompat;
+//import android.support.wear.ambient.AmbientMode;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
@@ -49,9 +50,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     private static final String TAG = "WearActivity";
 
-//    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
-    private String FILENAME ="";
-    private String file_path;
     private boolean isRecording = false;
 //    private boolean send_to_mobile = false;
     private Button btn_record;
@@ -69,12 +67,12 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private TextView textView;
     private String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
     private String filename = String.format("%s_%s.txt", "SENSORDATA", date);
+
 //    private String sensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-//        Let the app always on
         setAmbientEnabled();
         setContentView(R.layout.activity_main);
 //        startService(new Intent(this, MessageReceiverService.class));
@@ -144,9 +142,10 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                     isRecording = false;
                     String start_tex = "START";
                     btn_record.setText(start_tex);
-//                    cb_write_to_file.setEnabled(true);
                     try {
                         if(fos!=null)
+                            fos.write(sb.toString().getBytes());
+                            sb.setLength(0);
                             fos.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -186,21 +185,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             String temp = "Found " + sensorArray.length + " sensors";
             textView.setText(temp);
         }
-        // Create file
-        file_path = getDocStorageDir(getBaseContext()).getAbsolutePath()+"/"+filename;
-        Log.i(TAG, "file path" + file_path);
-        try {
-            fos = new FileOutputStream(new File(file_path));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try{
-            fos.write(sb.toString().getBytes());
-            fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
-        } catch (IOException e) {
-            Log.e(TAG, "here");
-            e.printStackTrace();
-        }
+        createFile();
     }
 //
     public void onBeep(View view){
@@ -211,55 +196,50 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // calculate timestamp
-        if(sensorTimeReference == 0L && myTimeReference == 0L) {
-            sensorTimeReference = event.timestamp;
-            myTimeReference = System.currentTimeMillis();
-        }
-        // set event timestamp to current time in milliseconds
-        long time = myTimeReference +
-                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-
-        if (!usefulSensor.contains(event.sensor.getType())){
-            // if the sensor type is not useful, skip it
-            return;
-        }
-
         if(isRecording){
-            WriteSensorEvent(time,event.sensor.getType(), event.values);
-        }
+            if (!usefulSensor.contains(event.sensor.getType())){
+                // if the sensor type is not useful, skip it
+                // only consider useful sensors
+                return;
+            }
 
-//        sensorEventBuffer += sensorEventToString(event.sensor.getName(), time, event.sensor.getType(), event.values, event.accuracy);
-//
-//        if (System.currentTimeMillis() - lastSendTime < 1000){
-//            return;
-//        }
-//        if (send_to_mobile){
-//            client.sendSensorData(event.sensor.getName(), event.sensor.getType(), event.accuracy, time, event.values);
-//        }
+            // calculate timestamp
+            if(sensorTimeReference == 0L && myTimeReference == 0L) {
+                sensorTimeReference = event.timestamp;
+                myTimeReference = System.currentTimeMillis();
+            }
+            // set event timestamp to current time in milliseconds
+
+            WriteSensorEvent(myTimeReference +
+                    Math.round((event.timestamp - sensorTimeReference) / 1000000.0),event.sensor.getType(), event.values);
+        }
     }
 
 
     public void WriteSensorEvent(long time, int type, float[] values){
         try {
-            StringBuilder temp = new StringBuilder(String.valueOf(time) + ", " + String.valueOf(type));
+            sb.append(String.valueOf(time) + ", " + String.valueOf(type));
             for (int i = 0; i < 5; i++){
                 if (i<values.length){
-                    temp.append(", ").append(String.valueOf(values[i]));
+                    sb.append(", ").append(String.valueOf(values[i]));
 
                 } else {
-                    temp.append(", ");
+                    sb.append(", ");
                 }
 
             }
-            temp.append('\n');
-            fos.write(temp.toString().getBytes());
-            write_count += 1;
-            if (write_count % 10000 == 0){
-                Log.i(TAG, "write count: " + write_count);
-                String write_temp = "write count: " + write_count;
-                textView.setText(write_temp);
+            sb.append('\n');
+            if (sb.length() > 2500){
+                fos.write(sb.toString().getBytes());
+                sb.setLength(0);
+                write_count += 1;
+                if (write_count % 150 == 0){
+                    Log.i(TAG, "write times: " + write_count);
+                    String write_temp = "write times: " + write_count;
+                    textView.setText(write_temp);
+                }
             }
+
         } catch (IOException e) {
             Log.e(TAG, "here");
             e.printStackTrace();
@@ -276,6 +256,24 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         return file;
     }
 
+    public void createFile(){
+        // Create file
+        String file_path = getDocStorageDir(getBaseContext()).getAbsolutePath() + "/" + filename;
+        Log.i(TAG, "file path" + file_path);
+        try {
+            fos = new FileOutputStream(new File(file_path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try{
+            fos.write(sb.toString().getBytes());
+            fos.write("TIMESTAMP, SENSORTYPE, VALUES1, VALUES2, VALUES3, VALUES4, VALUES5 \n".getBytes());
+            sb.setLength(0);
+        } catch (IOException e) {
+            Log.e(TAG, "here");
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Wearable.DataApi.addListener(mGoogleApiClient, this);
@@ -321,4 +319,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
         super.onDestroy();
 //        stopService(new Intent(this, SensorService.class));
     }
+
+
 }
