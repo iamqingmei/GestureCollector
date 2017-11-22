@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 //import android.support.v4.app.ActivityCompat;
@@ -19,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 //import android.widget.CheckBox;
 import android.widget.TextView;
@@ -67,18 +69,27 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private TextView textView;
     private String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
     private String filename = String.format("%s_%s.txt", "SENSORDATA", date);
+    private PowerManager.WakeLock wakeLock;
 
 //    private String sensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setAmbientEnabled();
+
         setContentView(R.layout.activity_main);
 //        startService(new Intent(this, MessageReceiverService.class));
 //        startService(new Intent(this, SensorService.class));
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
         client = DeviceClient.getInstance(this);
+
+        // always on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setAmbientEnabled();
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyWakelockTag");
+        wakeLock.acquire();
 
         textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
@@ -95,6 +106,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 Log.i(TAG, "btn quit onclick");
                 android.os.Process.killProcess(android.os.Process.myPid());
 //                stopService(new Intent(getApplicationContext(), SensorService.class));
+                wakeLock.release();
                 System.exit(1);
             }
         });
@@ -147,6 +159,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                             fos.write(sb.toString().getBytes());
                             sb.setLength(0);
                             fos.close();
+                            fos = null;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -154,7 +167,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 }else{
                     Log.i(TAG, "btn Start onclick");
                     client.sendTag("wear_start");
-
+                    createFile();
                     isRecording = true;
                     String stop_tex = "STOP";
                     btn_record.setText(stop_tex);
@@ -258,6 +271,9 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
     public void createFile(){
         // Create file
+        if (fos != null){
+            return;
+        }
         String file_path = getDocStorageDir(getBaseContext()).getAbsolutePath() + "/" + filename;
         Log.i(TAG, "file path" + file_path);
         try {

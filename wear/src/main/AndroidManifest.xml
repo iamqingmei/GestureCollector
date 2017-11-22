@@ -13,7 +13,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        android:keepScreenOn="true">
 
         <meta-data
             android:name="com.google.android.wearable.standalone"
