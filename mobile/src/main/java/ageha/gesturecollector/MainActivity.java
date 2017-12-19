@@ -43,7 +43,7 @@ import ageha.gesturecollector.event.BusProvider;
 import ageha.gesturecollector.ui.*;
 import ageha.shared.DataMapKeys;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AmbientMode.AmbientCallbackProvider {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
     static final private int count_down_time = 4;

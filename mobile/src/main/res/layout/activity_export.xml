@@ -29,20 +29,20 @@
             android:layout_margin="16dp"
             android:text="None"/>
 
-        <Button
-            android:id="@+id/exportDataButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Export Sensor Data" />
+        <!--<Button-->
+            <!--android:id="@+id/exportDataButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="16dp"-->
+            <!--android:text="Export Sensor Data" />-->
 
-        <ProgressBar
-            android:id="@+id/export_progress"
-            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="24dp"
-            android:layout_margin="16dp"
-            android:visibility="gone" />
+        <!--<ProgressBar-->
+            <!--android:id="@+id/export_progress"-->
+            <!--style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="24dp"-->
+            <!--android:layout_margin="16dp"-->
+            <!--android:visibility="gone" />-->
 
 
         <!--<Button-->
@@ -75,12 +75,12 @@
             android:layout_margin="16dp"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/deleteDataButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Delete All Sensor Data" />
+        <!--<Button-->
+            <!--android:id="@+id/deleteDataButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="16dp"-->
+            <!--android:text="Delete All Sensor Data" />-->
 
         <Button
             android:id="@+id/deleteTagButton"

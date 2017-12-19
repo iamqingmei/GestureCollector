@@ -2,9 +2,7 @@ package ageha.gesturecollector.ui;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -19,32 +17,26 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import ageha.gesturecollector.MainActivity;
 import ageha.gesturecollector.TagManager;
 import ageha.gesturecollector.SensorManager;
-import ageha.gesturecollector.data.Sensor;
 import ageha.gesturecollector.data.TagData;
 import ageha.gesturecollector.R;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import io.realm.Realm;
+import ageha.gesturecollector.util;
 
 public class ExportActivity extends AppCompatActivity {
-    private ProgressBar dataProgressbar;
+//    private ProgressBar dataProgressbar;
     private ProgressBar tagProgressbar;
     private final String TAG = "ExportActivity";
     private TextView export_text;
-    private FileOutputStream fos;
-    private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,30 +44,31 @@ public class ExportActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_export);
 
-        dataProgressbar = findViewById(R.id.export_progress);
+//        dataProgressbar = findViewById(R.id.export_progress);
         tagProgressbar = findViewById(R.id.export_progress_tag);
 
         setSupportActionBar((Toolbar) findViewById(R.id.my_awesome_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTitle("Export Data");
-        findViewById(R.id.exportDataButton).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        Runnable r = new Runnable() {
-                            @Override
-                            public void run() {
-                                exportDataExternalFile();
-                            }
-                        };
 
-                        Thread t = new Thread(r);
-                        t.start();
-                    }
-                }
-
-        );
+//        findViewById(R.id.exportDataButton).setOnClickListener(
+//                new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(final View v) {
+//                        Runnable r = new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                exportDataExternalFile();
+//                            }
+//                        };
+//
+//                        Thread t = new Thread(r);
+//                        t.start();
+//                    }
+//                }
+//
+//        );
 
         findViewById(R.id.deleteTagButton).setOnClickListener(
                 new View.OnClickListener(){
@@ -107,35 +100,16 @@ public class ExportActivity extends AppCompatActivity {
         );
 
 
-//        findViewById(R.id.exportTagsButton).setOnClickListener(
+//        findViewById(R.id.deleteDataButton).setOnClickListener(
 //                new View.OnClickListener() {
 //                    @Override
 //                    public void onClick(final View v) {
-//                        Runnable r = new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                exportTagsFile();
-//                            }
-//                        };
-//
-//                        Thread t = new Thread(r);
-//                        t.start();
+//                        Log.i(TAG, "deleteDataButton");
+//                        SensorManager.getInstance(ExportActivity.this).DeleteAllSensors();
+//                        export_text.setText(getDataInfo());
 //                    }
 //                }
-//
 //        );
-
-
-        findViewById(R.id.deleteDataButton).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        Log.i(TAG, "deleteDataButton");
-                        SensorManager.getInstance(ExportActivity.this).DeleteAllSensors();
-                        export_text.setText(getDataInfo());
-                    }
-                }
-        );
 
         export_text = findViewById(R.id.data_summary_text);
 
@@ -176,75 +150,82 @@ public class ExportActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    private void exportDataExternalFile() {
-        SensorManager mSensorManager = SensorManager.getInstance(this);
-
-        String res = mSensorManager.getSensorDataString();
-
-        final int total_row = res.split("\r\n|\r|\n").length;
-        Log.i("GestureCollector", "total_row = " + total_row);
-
-        final String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
-        String filename = String.format("%s_%s.txt", "SensorData", date);
-
-        String file_path = getDocStorageDir(getBaseContext(),"SENSORDATA").getAbsolutePath()+"/"+filename;
-        Log.i(TAG, "file path" + file_path);
-
-
-        try {
-
-            fos = new FileOutputStream(new File(file_path));
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    dataProgressbar.setMax(total_row);
-                    dataProgressbar.setVisibility(View.VISIBLE);
-                    dataProgressbar.setProgress(0);
-                }
-            });
-
-            // Write the string to the file
-            fos.write(res.getBytes());
-            if (fos!=null){
-                fos.close();
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            dataProgressbar.setVisibility(View.GONE);
-                        }
-                    }, 1000);
-
-                }
-            });
-
-
-            Log.i("GestureCollector", "export sensor data to external file finished!");
-        } catch (IOException ioe) {
-            Log.e("GestureCollector", "export sensor data IOException while writing Logfile");
-        }
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        export_text.setText(getDataInfo());
-                    }
-                }, 1000);
-
-            }
-        });
-
-    }
+//    private void exportDataExternalFile() {
+//        SensorManager mSensorManager = SensorManager.getInstance(this);
+//
+//        String res = mSensorManager.getSensorDataString();
+//
+//        final int total_row = res.split("\r\n|\r|\n").length;
+//        Log.i("GestureCollector", "total_row = " + total_row);
+//
+//        final String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
+//        String filename;
+//        if (util.get_filename() == null){
+//            filename = String.format("%s_%s.txt", "SensorData", date);
+//        }
+//        else{
+//            filename = String.format("%s_%s.txt", "SensorData", util.get_filename());
+//        }
+//
+//
+//        String file_path = getDocStorageDir(getBaseContext(),"SENSORDATA").getAbsolutePath()+"/"+filename;
+//        Log.i(TAG, "file path" + file_path);
+//
+//
+//        try {
+//
+//            fos = new FileOutputStream(new File(file_path));
+//
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    dataProgressbar.setMax(total_row);
+//                    dataProgressbar.setVisibility(View.VISIBLE);
+//                    dataProgressbar.setProgress(0);
+//                }
+//            });
+//
+//            // Write the string to the file
+//            fos.write(res.getBytes());
+//            if (fos!=null){
+//                fos.close();
+//            }
+//
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            dataProgressbar.setVisibility(View.GONE);
+//                        }
+//                    }, 1000);
+//
+//                }
+//            });
+//
+//
+//            Log.i("GestureCollector", "export sensor data to external file finished!");
+//        } catch (IOException ioe) {
+//            Log.e("GestureCollector", "export sensor data IOException while writing Logfile");
+//        }
+//
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        export_text.setText(getDataInfo());
+//                    }
+//                }, 1000);
+//
+//            }
+//        });
+//
+//    }
 
 
 //    private void exportTagsFile() {
@@ -332,13 +313,19 @@ public class ExportActivity extends AppCompatActivity {
 
     private void exportTagsExternalFile(){
         String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
-        String filename = String.format("%s_%s.txt", "Tags", date);
+        String filename;
+        if (util.get_filename() == null){
+            filename = String.format("%s_%s.txt", "Tags", date);
+        }
+        else{
+            filename = String.format("%s_%s.txt", "Tags", util.get_filename());
+        }
 
         String file_path = getDocStorageDir(getBaseContext(),"TAGDATA").getAbsolutePath()+"/"+filename;
         Log.i(TAG, "file path" + file_path);
 
         try {
-            fos = new FileOutputStream(new File(file_path));
+            FileOutputStream fos = new FileOutputStream(new File(file_path));
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -371,7 +358,7 @@ public class ExportActivity extends AppCompatActivity {
                         String.valueOf(tag.getLeftright()) + "\n").getBytes());
             }
             // Close
-            if(fos!=null)
+            if(fos !=null)
                 fos.close();
 
 
@@ -419,6 +406,7 @@ public class ExportActivity extends AppCompatActivity {
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED){
+            int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 99;
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_CONTACTS},
                     MY_PERMISSIONS_REQUEST_READ_CONTACTS);
