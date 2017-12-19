@@ -128,8 +128,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             cur_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    boolean check_red = check_tester_info_input(getApplicationContext());
-                    if (!check_red){
+                    boolean check_res = check_tester_info_input(getApplicationContext());
+                    if (!check_res){
                         util.warning_msg(getApplicationContext());
                     }
 //                    else if (!mTagManager.if_recording()){
@@ -150,14 +150,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViewById(R.id.btn_action_finish).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tagging("ACTION_FINISH");
+                boolean check_res = check_tester_info_input(getApplicationContext());
+                if (!check_res){
+                    util.warning_msg(getApplicationContext());
+                }
+                else{
+                    tagging("ACTION_FINISH");
+                }
             }
         });
 
         findViewById(R.id.btn_time_calibration).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tagging("TIME_CALIBRATION");
+
+                boolean check_res = check_tester_info_input(getApplicationContext());
+                if (!check_res){
+                    util.warning_msg(getApplicationContext());
+                }
+                else{
+                    tagging("TIME_CALIBRATION");
+                }
             }
         });
 
