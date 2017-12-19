@@ -11,6 +11,15 @@ import android.widget.Toast;
  */
 
 public class util {
+    private static String file_name = null;
+
+    public static void set_filename(String s){
+        file_name = s;
+    }
+
+    public static String get_filename(){
+        return file_name;
+    }
     public static void warning_msg(Context context){
         Log.w("main_activity", "warning_msg function");
         CharSequence text = "Please input the tester information!";

@@ -453,6 +453,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     tagging(dataMap.getString(DataMapKeys.TAG));
                 }
 
+                if (path.startsWith("/sensors/filename")){
+                    Log.i(TAG, "received file name from watch");
+                    DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                    util.set_filename(dataMap.getString(DataMapKeys.FILENAME));
+                }
+
             }
         }
     }

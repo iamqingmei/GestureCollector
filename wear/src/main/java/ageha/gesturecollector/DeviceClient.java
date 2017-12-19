@@ -53,26 +53,41 @@ class DeviceClient {
         });
     }
 
-    void sendSensorData(final String sensorName, final int sensorType, final int accuracy, final long timestamp, final float[] values) {
-        long t = System.currentTimeMillis();
-
-        long lastTimestamp = lastSensorData.get(sensorType);
-        long timeAgo = t - lastTimestamp;
-
-        if (timeAgo < 100){
-                return;
-        }
-
-        lastSensorData.put(sensorType, t);
-
+    void sendFilename(final String filename){
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                sendSensorDataInBackground(sensorName, sensorType, accuracy, timestamp, values);
+                sendFilenameInBackground(filename);
             }
         });
     }
 
+//    void sendSensorData(final String sensorName, final int sensorType, final int accuracy, final long timestamp, final float[] values) {
+//        long t = System.currentTimeMillis();
+//
+//        long lastTimestamp = lastSensorData.get(sensorType);
+//        long timeAgo = t - lastTimestamp;
+//
+//        if (timeAgo < 100){
+//                return;
+//        }
+//
+//        lastSensorData.put(sensorType, t);
+//
+//        executorService.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                sendSensorDataInBackground(sensorName, sensorType, accuracy, timestamp, values);
+//            }
+//        });
+//    }
+
+    private void sendFilenameInBackground(String s){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/sensors/filename");
+        putDataMapReq.getDataMap().putString(DataMapKeys.TAG, s);
+        PutDataRequest putDataRequest = putDataMapReq.asPutDataRequest();
+        send(putDataRequest);
+    }
     private void sendTagInBackground(String tagName){
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/sensors/tag");
         putDataMapReq.getDataMap().putString(DataMapKeys.TAG, tagName);

@@ -167,6 +167,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 }else{
                     Log.i(TAG, "btn Start onclick");
                     client.sendTag("wear_start");
+                    client.sendFilename(date);
                     createFile();
                     isRecording = true;
                     String stop_tex = "STOP";
