@@ -26,9 +26,16 @@
                 android:text="Quit" />
         </LinearLayout>
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Filename"
+                android:id="@+id/btn_filename"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -55,6 +55,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private boolean isRecording = false;
 //    private boolean send_to_mobile = false;
     private Button btn_record;
+    private Button btn_filename;
 
     private GoogleApiClient mGoogleApiClient;
     private FileOutputStream fos = null;
@@ -67,8 +68,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
     private static ArrayList<Integer> usefulSensor = new ArrayList<>(Arrays.asList(1, 2, 4, 11, 3, 26, 17, 9, 10));
     private int write_count = 0;
     private TextView textView;
-    private String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
-    private String filename = String.format("%s_%s.txt", "SENSORDATA", date);
+    private String date;
+    private String filename;
     private PowerManager.WakeLock wakeLock;
 
 //    private String sensorEvent
@@ -82,6 +83,8 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 //        startService(new Intent(this, SensorService.class));
         int sampling_rate = SensorManager.SENSOR_DELAY_FASTEST;
         client = DeviceClient.getInstance(this);
+        date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
+        filename = String.format("%s_%s.txt", "SENSORDATA", date);
 
         // always on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -93,6 +96,7 @@ public class WearActivity extends WearableActivity implements SensorEventListene
 
         textView = findViewById(R.id.text);
         btn_record = findViewById(R.id.btn_recording);
+        btn_filename = findViewById(R.id.btn_filename);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -167,7 +171,6 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 }else{
                     Log.i(TAG, "btn Start onclick");
                     client.sendTag("wear_start");
-                    client.sendFilename(date);
                     createFile();
                     isRecording = true;
                     String stop_tex = "STOP";
@@ -176,6 +179,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
                 }
             }
         });
+
+        btn_record.setOnClickListener(new View.OnClickListener() {
+                                          @Override
+                                          public void onClick(View v) {
+                                              client.sendFilename(date);
+                                          }
+                                      });
 
 //        Register Sensors
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
