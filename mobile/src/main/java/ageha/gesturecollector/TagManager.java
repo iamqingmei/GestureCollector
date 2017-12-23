@@ -15,6 +15,16 @@ public class TagManager {
 
     private static TagManager instance;
 
+    private String file_name = null;
+
+    public void set_filename(String s){
+        file_name = s;
+    }
+
+    public String get_filename(){
+        return file_name;
+    }
+
     private LinkedList<TagData> tags = new LinkedList<>();
 
 

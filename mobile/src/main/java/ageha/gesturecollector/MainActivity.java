@@ -440,6 +440,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 DataItem dataItem = dataEvent.getDataItem();
                 Uri uri = dataItem.getUri();
                 String path = uri.getPath();
+                DataMap dataMap;
 //                Log.i(TAG, uri.getPath());
                 if (path.startsWith("/sensors/datapoint")) {
                     unpackSensorData(
@@ -449,14 +450,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 if (path.startsWith("/sensors/tag")){
                     Log.i(TAG, "received tags from wear");
-                    DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
-                    tagging(dataMap.getString(DataMapKeys.TAG));
+                    dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                    boolean check_res = check_tester_info_input(getApplicationContext());
+                    if (!check_res){
+                        util.warning_msg(getApplicationContext());
+                    }
+                    else {
+                        tagging(dataMap.getString(DataMapKeys.TAG));
+                    }
                 }
 
                 if (path.startsWith("/sensors/filename")){
                     Log.i(TAG, "received file name from watch");
-                    DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
-                    util.set_filename(dataMap.getString(DataMapKeys.FILENAME));
+                    util.warning_msg(getApplicationContext(), "received file name from watch");
+                    dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                    mTagManager.set_filename(dataMap.getString(DataMapKeys.FILENAME));
+                    Log.i(TAG, "filename: " + mTagManager.get_filename());
                 }
 
             }

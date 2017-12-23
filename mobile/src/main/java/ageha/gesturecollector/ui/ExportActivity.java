@@ -314,11 +314,11 @@ public class ExportActivity extends AppCompatActivity {
     private void exportTagsExternalFile(){
         String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
         String filename;
-        if (util.get_filename() == null){
+        if (TagManager.getInstance(this).get_filename() == null){
             filename = String.format("%s_%s.txt", "Tags", date);
         }
         else{
-            filename = String.format("%s_%s.txt", "Tags", util.get_filename());
+            filename = String.format("%s_%s.txt", "Tags", TagManager.getInstance(this).get_filename());
         }
 
         String file_path = getDocStorageDir(getBaseContext(),"TAGDATA").getAbsolutePath()+"/"+filename;
