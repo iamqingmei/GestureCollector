@@ -84,7 +84,7 @@ class DeviceClient {
 
     private void sendFilenameInBackground(String s){
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/sensors/filename");
-        putDataMapReq.getDataMap().putString(DataMapKeys.TAG, s);
+        putDataMapReq.getDataMap().putString(DataMapKeys.FILENAME, s);
         PutDataRequest putDataRequest = putDataMapReq.asPutDataRequest();
         send(putDataRequest);
     }
