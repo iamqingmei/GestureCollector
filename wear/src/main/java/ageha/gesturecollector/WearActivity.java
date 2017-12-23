@@ -180,12 +180,13 @@ public class WearActivity extends WearableActivity implements SensorEventListene
             }
         });
 
-        btn_record.setOnClickListener(new View.OnClickListener() {
-                                          @Override
-                                          public void onClick(View v) {
-                                              client.sendFilename(date);
-                                          }
-                                      });
+        btn_filename.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                  Log.i(TAG, "btn_filename onclick");
+                  client.sendFilename(date);
+              }
+          });
 
 //        Register Sensors
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

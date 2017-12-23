@@ -366,6 +366,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (tag.equals("wear_start")){
+            if (mTagManager.get_filename() == null){
+                return;
+            }
+            // must have file name first before tagging
             findViewById(R.id.linearLayout_bottom_tags).setVisibility(View.VISIBLE);
             findViewById(R.id.linearLayout_top_tags).setVisibility(View.VISIBLE);
             findViewById(R.id.linearLayout_time).setVisibility(View.GONE);
