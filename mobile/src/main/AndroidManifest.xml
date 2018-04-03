@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ageha.gesturecollector">
+
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -11,40 +13,35 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
+            android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="ageha.gesturecollector.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.AboutActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="About">
-        </activity>
-
+            android:label="About"
+            android:parentActivityName=".MainActivity"></activity>
         <activity
-            android:name="ageha.gesturecollector.ui.ExportActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/action_export">
-        </activity>
+            android:name=".ui.ExportActivity"
+            android:label="@string/action_export"
+            android:parentActivityName=".MainActivity"></activity>
 
-
-        <!--<service android:name=".SensorReceiverService">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="com.google.android.gms.wearable.DATA_CHANGED" />-->
-                <!--<action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />-->
-                <!--<action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />-->
-                <!--<action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />-->
-                <!--<data android:scheme="wear" android:host="*" android:pathPrefix="/sensors" />-->
-            <!--</intent-filter>-->
-        <!--</service>-->
+        <!-- <service android:name=".SensorReceiverService"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="com.google.android.gms.wearable.DATA_CHANGED" /> -->
+        <!-- <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" /> -->
+        <!-- <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" /> -->
+        <!-- <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" /> -->
+        <!-- <data android:scheme="wear" android:host="*" android:pathPrefix="/sensors" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
     </application>
 
 </manifest>
